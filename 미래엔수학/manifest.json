@@ -1,0 +1,22 @@
+{
+  "name": "미래엔수학 능동해냄 교실",
+  "short_name": "미래엔수학",
+  "start_url": "./index_sms_aligo.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#2563eb",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "nam-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "nam-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
