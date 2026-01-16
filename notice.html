@@ -1,0 +1,232 @@
+﻿<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>출결·학습 알림장 | 미래엔수학</title>
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="미래엔수학 출결·학습 알림장" />
+  <meta property="og:description" content="자녀의 등·하원, 학습 내용, 상담 내용을 확인하세요." />
+  <meta property="og:image" content="https://shee0777.vercel.app/nam-512.png" />
+  <meta property="og:url" content="https://shee0777.vercel.app/notice.html" />
+
+  <style>
+    body{font-family:'Pretendard', system-ui, -apple-system, sans-serif; margin:0; background:#f8fafc; color:#0f172a;}
+    .wrap{max-width:600px; margin:0 auto; padding:20px;}
+    
+    .card{
+        background:#ffffff; 
+        border:1px solid #e2e8f0; 
+        border-radius:20px; 
+        padding:20px; 
+        margin-bottom:16px; 
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+    .title{font-size:18px; font-weight:800; margin-bottom:12px; color:#1e293b; display:flex; align-items:center; gap:8px;}
+    .muted{color:#64748b; font-size:15px; line-height:1.5;}
+    
+    .row{display:flex; gap:12px;}
+    .row > .card { flex:1; text-align:center; }
+    
+    .badge-wrap{ text-align:center; margin-bottom:20px; }
+    .badge{ 
+        display:inline-block; padding:6px 14px; 
+        border-radius:999px; background:#eff6ff; 
+        color:#3b82f6; font-size:13px; font-weight:700; 
+    }
+
+    textarea{
+        width:100%; box-sizing:border-box; 
+        background:#f8fafc; border:1px solid #cbd5e1; 
+        border-radius:12px; padding:14px; 
+        font-size:15px; min-height:100px; resize:vertical;
+        margin-bottom:10px;
+    }
+    textarea:focus{ outline:none; border-color:#3b82f6; background:#fff; }
+
+    .btn{
+        width:100%;
+        background:linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); 
+        border:0; color:white; 
+        padding:16px; border-radius:16px; 
+        font-size:16px; font-weight:700; cursor:pointer;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    }
+    .btn:disabled{ opacity:0.6; cursor:not-allowed; }
+    
+    #noticeText {
+        background: #fffbeb;
+        border: 1px solid #fcd34d;
+        padding: 16px;
+        border-radius: 12px;
+        color: #451a03;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    
+    <div id="statusArea" style="text-align:center; margin:40px 0;">
+        <div id="status" style="font-size:18px; font-weight:bold; color:#64748b;">정보를 불러오는 중입니다...</div>
+    </div>
+
+    <div id="contentArea" style="display:none;">
+        <div class="card" style="text-align:center; padding:30px 20px;">
+             <img src="nam-192.png" style="width:60px; height:60px; border-radius:18px; margin-bottom:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1);">
+             <h2 id="studentInfo" style="margin:0; font-size:24px; color:#0f172a;">-</h2>
+             <p id="attInfo" style="margin:5px 0 0 0; color:#3b82f6; font-weight:bold;">이번 달 등원 0회</p>
+        </div>
+
+        <div class="card">
+            <div class="title">📢 오늘의 알림장</div>
+            <div id="noticeText" style="white-space:pre-wrap;">(등록된 내용이 없습니다)</div>
+        </div>
+
+        <div class="card">
+            <div class="title">💬 선생님께 답장하기</div>
+            <div class="muted" style="margin-bottom:10px; font-size:14px;">궁금하신 점이나 요청사항을 남겨주세요.</div>
+            <textarea id="msg" placeholder="예) 선생님, 다음 주 월요일은 가족 여행으로 결석합니다."></textarea>
+            <button id="sendBtn" class="btn">메시지 보내기</button>
+            <div id="sendResult" style="text-align:center; margin-top:10px; font-weight:bold;"></div>
+        </div>
+    </div>
+  </div>
+
+  <script type="module">
+    // 1. Firebase 설정 (index.html과 동일하게 맞춤)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDPLl5y5xMBL07yLyQDU185qfYLa4c3yv4",
+      authDomain: "namyang-f3a98.firebaseapp.com",
+      projectId: "namyang-f3a98",
+      storageBucket: "namyang-f3a98.firebasestorage.app",
+      messagingSenderId: "641432133626",
+      appId: "1:641432133626:web:4d31e36d5dbb0db4df4e43",
+      measurementId: "G-23L6KZERMF"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const $ = (id) => document.getElementById(id);
+
+    // URL에서 토큰 가져오기
+    function getToken(){
+      const sp = new URLSearchParams(location.search);
+      return sp.get("token");
+    }
+
+    // 이번 달 출석 횟수 계산
+    function calcThisMonthAttendance(attendanceLog){
+      const now = new Date();
+      const logs = (attendanceLog || []).map(ts => {
+        if(ts && ts.toDate) return ts.toDate();
+        if(ts && ts.seconds) return new Date(ts.seconds * 1000);
+        return new Date(ts);
+      }).filter(d => !isNaN(d));
+      return logs.filter(d => d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()).length;
+    }
+
+    async function load(){
+      const token = getToken();
+      
+      if(!token){
+        $("status").innerText = "잘못된 접근입니다. (토큰 없음)";
+        return;
+      }
+
+      // 1. 토큰으로 학생ID 찾기
+      let studentId = null;
+      try {
+          // Firestore에서 조회
+          const tSnap = await getDoc(doc(db, "noticeTokens", token));
+          if(tSnap.exists()) studentId = tSnap.data().studentId;
+      } catch(e) {
+          console.warn("Firestore 토큰 조회 실패", e);
+      }
+
+      // (백업) 로컬 스토리지에서 조회 (같은 기기 테스트용)
+      if(!studentId) {
+          try {
+              const raw = localStorage.getItem("noticeToken:" + token);
+              if(raw) studentId = JSON.parse(raw).studentId;
+          } catch(e){}
+      }
+
+      if(!studentId){
+        $("status").innerText = "유효하지 않거나 만료된 링크입니다.";
+        return;
+      }
+
+      // 2. 학생 정보 불러오기
+      $("status").innerText = "학생 정보를 불러오는 중...";
+      try {
+          const sSnap = await getDoc(doc(db, "students", studentId));
+          if(!sSnap.exists()){
+            $("status").innerText = "학생 정보가 삭제되었습니다.";
+            return;
+          }
+
+          const s = sSnap.data();
+          
+          // 화면 표시
+          $("statusArea").style.display = 'none';
+          $("contentArea").style.display = 'block';
+
+          $("studentInfo").innerText = `${s.name} 학생`;
+          
+          const monthCnt = calcThisMonthAttendance(s.attendanceLog || []);
+          $("attInfo").innerText = `이번 달 등원 ${monthCnt}회`;
+
+          // 선생님이 보낸 알림장 내용 파싱 (줄바꿈 처리)
+          // 1. 방금 보낸 메시지를 로컬스토리지나 URL 파라미터로 넘길 수도 있지만,
+          //    현재 구조에서는 '마지막 알림'을 DB에 저장하거나 해야 합니다.
+          //    일단 지금은 이전에 저장된 noticeText 필드를 보여줍니다.
+          //    (주의: 카톡 보낼 때 DB에 noticeText를 업데이트하는 로직이 index.html에 추가되어야 완벽합니다.)
+          //    지금은 임시로 기본 텍스트를 보여주거나, index.html에서 알림장 보낼 때 DB 업데이트 기능을 추가해야 합니다.
+          
+          // [중요] 사용자가 카톡으로 보낸 텍스트 자체는 DB에 저장이 안 되어 있을 수 있습니다.
+          // index.html 수정이 필요할 수 있지만, 일단 화면이 뜨는지부터 확인합니다.
+          const noticeText = s.lastNotice || "학부모님, 안녕하세요! \n오늘의 학습 내용을 확인해주세요.";
+          $("noticeText").innerText = noticeText;
+
+      } catch(e) {
+          console.error(e);
+          $("status").innerText = "오류가 발생했습니다.";
+      }
+
+      // 메시지 보내기 버튼
+      $("sendBtn").onclick = async () => {
+        const msg = $("msg").value.trim();
+        if(!msg) return alert("내용을 입력해주세요.");
+        
+        $("sendBtn").disabled = true;
+        $("sendBtn").innerText = "전송 중...";
+        
+        try{
+          await addDoc(collection(db, "parentMessages"), {
+            token,
+            studentId,
+            message: msg,
+            createdAt: serverTimestamp(),
+            read: false
+          });
+          alert("선생님께 메시지를 보냈습니다! ✅");
+          $("msg").value = "";
+          $("sendResult").innerText = "전송 완료되었습니다.";
+        }catch(e){
+          alert("전송 실패: " + e.message);
+        }finally{
+          $("sendBtn").disabled = false;
+          $("sendBtn").innerText = "메시지 보내기";
+        }
+      };
+    }
+
+    load();
+  </script>
+</body>
+</html>

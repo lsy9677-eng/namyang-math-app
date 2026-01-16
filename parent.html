@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>학부모 알림장 | 미래엔수학</title>
+    <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+    <style>
+        body { margin: 0; padding: 20px; font-family: 'Pretendard', sans-serif; background: #f1f5f9; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; }
+        
+        .card { background: white; border-radius: 20px; padding: 25px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; }
+        .card.left { text-align: left; }
+        
+        h2 { margin: 10px 0 5px; font-size: 22px; }
+        .info { color: #666; font-size: 14px; margin-bottom: 15px; }
+        
+        .notice-box { background: #fffbeb; border: 1px solid #fcd34d; padding: 15px; border-radius: 12px; text-align: left; line-height: 1.6; white-space: pre-wrap; }
+        
+        textarea { width: 100%; height: 80px; padding: 10px; border: 1px solid #ddd; border-radius: 10px; margin-top: 10px; box-sizing: border-box; }
+        .btn { width: 100%; padding: 15px; background: #3b82f6; color: white; border: none; border-radius: 12px; font-weight: bold; font-size: 16px; margin-top: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="loading" style="text-align:center; padding:50px;">
+            정보를 불러오는 중입니다...
+        </div>
+
+        <div id="content" style="display:none;">
+            <div class="card">
+                <img src="nam-192.png" style="width:80px; border-radius:20px; box-shadow:0 5px 15px rgba(0,0,0,0.1);">
+                <h2 id="sName">학생 이름</h2>
+                <div class="info" id="sInfo">학교 | 학년</div>
+                <div style="background:#f0f9ff; color:#0369a1; padding:10px; border-radius:10px; font-weight:bold;">
+                    이번 달 등원: <span id="sAtt">0</span>회
+                </div>
+            </div>
+
+            <div class="card left">
+                <h3 style="margin-top:0;">📢 선생님 알림</h3>
+                <div id="sNotice" class="notice-box">내용 없음</div>
+            </div>
+
+            <div class="card left">
+                <h3 style="margin-top:0;">💬 선생님께 답장하기</h3>
+                <textarea id="replyMsg" placeholder="선생님께 드릴 말씀을 적어주세요."></textarea>
+                <button class="btn" onclick="sendReply()">보내기</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDPLl5y5xMBL07yLyQDU185qfYLa4c3yv4",
+            authDomain: "namyang-f3a98.firebaseapp.com",
+            projectId: "namyang-f3a98",
+            storageBucket: "namyang-f3a98.firebasestorage.app",
+            messagingSenderId: "641432133626",
+            appId: "1:641432133626:web:4d31e36d5dbb0db4df4e43",
+            measurementId: "G-23L6KZERMF"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let currentStudentId = null;
+        let currentToken = null;
+
+        window.onload = async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+            currentToken = token;
+
+            if (!token) return alert("잘못된 접근입니다 (토큰 없음).");
+
+            try {
+                // 1. 토큰으로 학생 ID 찾기
+                const tSnap = await getDoc(doc(db, "noticeTokens", token));
+                if (!tSnap.exists()) return alert("유효하지 않은 링크입니다.");
+                
+                const studentId = tSnap.data().studentId;
+                currentStudentId = studentId;
+
+                // 2. 학생 정보 가져오기
+                const sSnap = await getDoc(doc(db, "students", studentId));
+                if (!sSnap.exists()) return alert("학생 정보가 없습니다.");
+
+                const s = sSnap.data();
+
+                // 3. 화면 표시
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+
+                document.getElementById('sName').innerText = s.name;
+                document.getElementById('sInfo').innerText = (s.school || "") + " " + (s.belt || "");
+                document.getElementById('sNotice').innerText = s.lastNotice || "알림 내용이 없습니다.";
+
+                // 출석 계산
+                const now = new Date();
+                const logs = (s.attendanceLog || []).map(ts => ts.toDate ? ts.toDate() : new Date(ts.seconds * 1000));
+                const count = logs.filter(d => d.getMonth() === now.getMonth()).length;
+                document.getElementById('sAtt').innerText = count;
+
+            } catch(e) {
+                console.error(e);
+                alert("오류 발생: " + e.message);
+            }
+        };
+
+        window.sendReply = async () => {
+            const msg = document.getElementById('replyMsg').value;
+            if(!msg) return alert("내용을 입력하세요");
+            
+            try {
+                await addDoc(collection(db, "parentMessages"), {
+                    token: currentToken,
+                    studentId: currentStudentId,
+                    message: msg,
+                    createdAt: serverTimestamp(),
+                    read: false
+                });
+                alert("전송되었습니다!");
+                document.getElementById('replyMsg').value = "";
+            } catch(e) { alert("전송 실패: " + e.message); }
+        };
+    </script>
+</body>
+</html>
