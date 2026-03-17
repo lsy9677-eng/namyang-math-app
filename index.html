@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -16,73 +16,74 @@
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
 /* =========================================================
-   미래앤수학 능동해냄 교실 관리 앱 — 2026 Redesign
-   깔끔·명확·출석 중심 UI
+   2026 Parent-Friendly UI System (Mobile-first)
+   - Soft card UI + gentle 3D
+   - Bottom navigation on phone
+   - Tablet kiosk: big, tappable 3D attendance cards
    ========================================================= */
 
 :root{
-  --blue:#2563EB;
-  --blue-dark:#1E40AF;
-  --blue-light:#EFF6FF;
-  --yellow:#F59E0B;
-  --yellow-light:#FFFBEB;
+  --brand-blue:#3B82F6;
+  --brand-blue-700:#1D4ED8;
+  --brand-blue-soft:#EFF6FF;
 
-  --ink:#111827;
-  --ink-sub:#6B7280;
-  --ink-muted:#9CA3AF;
+  --brand-yellow:#FACC15;
+  --brand-yellow-soft:#FEF9C3;
 
-  --bg:#F3F4F6;
-  --surface:#FFFFFF;
-  --surface2:#F9FAFB;
+  --ink:#0F172A;
+  --ink-sub:#475569;
 
-  --border:#E5E7EB;
-  --border-focus:#93C5FD;
+  --bg:#F8FAFC;
+  --card:#FFFFFF;
 
-  --green:#16A34A;
-  --green-bg:#F0FDF4;
-  --red:#DC2626;
-  --red-bg:#FEF2F2;
-  --orange:#D97706;
+  --line: rgba(15,23,42,.08);
+  --shadow: 0 10px 30px rgba(15,23,42,.08);
+  --shadow-soft: 0 6px 16px rgba(15,23,42,.08);
 
-  --shadow-sm: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
-  --shadow-md: 0 4px 12px rgba(0,0,0,.08);
-  --shadow-lg: 0 8px 24px rgba(0,0,0,.10);
+  --success:#22C55E;
+  --warning:#F59E0B;
+  --danger:#EF4444;
 
-  --r: 14px;
-  --r-sm: 10px;
-  --r-lg: 20px;
-  --tap: 46px;
+  --r-lg: 22px;
+  --r-md: 16px;
+  --r-sm: 12px;
+
+  --tap: 48px;
 }
 
-*{ box-sizing:border-box; margin:0; padding:0; }
+*{ box-sizing:border-box; }
 html,body{ height:100%; }
 body{
-  font-family:'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: var(--bg);
-  color: var(--ink);
-  -webkit-font-smoothing: antialiased;
-  padding: 0 0 16px;
+  margin:0;
+  font-family:'Pretendard', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  background: radial-gradient(1200px 600px at 30% -10%, #DBEAFE 0%, rgba(219,234,254,0) 60%),
+              radial-gradient(900px 500px at 90% 10%, #FEF9C3 0%, rgba(254,249,195,0) 55%),
+              var(--bg);
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+ padding: 14px 12px 160px; 
 }
 
 .container{
   max-width: 860px;
   margin: 0 auto;
-  background: var(--surface);
-  min-height: 100vh;
+  background: rgba(255,255,255,.72);
+  border: 1px solid rgba(255,255,255,.6);
+  backdrop-filter: blur(14px);
+  border-radius: calc(var(--r-lg) + 6px);
+  box-shadow: var(--shadow);
+  padding: 14px;
 }
 
-/* ----- Header ----- */
+/* ----- Header (Brand) ----- */
 header{
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:12px;
-  padding: 14px 16px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  z-index: 80;
+  padding: 10px 10px 14px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 12px;
 }
 
 .brand{
@@ -92,11 +93,13 @@ header{
   min-width:0;
 }
 .brand-mark{
-  width: 42px;
-  height: 42px;
-  border-radius: var(--r-sm);
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
   object-fit: cover;
-  border: 1px solid var(--border);
+  box-shadow: 0 8px 20px rgba(59,130,246,.18);
+  background: #fff;
+  border: 1px solid rgba(15,23,42,.06);
 }
 .brand-title{
   display:flex;
@@ -105,9 +108,9 @@ header{
 }
 .brand-title strong{
   font-size: 16px;
-  font-weight: 800;
-  letter-spacing: -0.3px;
-  line-height: 1.2;
+  font-weight: 900;
+  letter-spacing: -0.2px;
+  line-height: 1.1;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
@@ -115,67 +118,92 @@ header{
 .brand-title span{
   font-size: 12px;
   color: var(--ink-sub);
-  margin-top: 1px;
   white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
 
 .admin-switch{
   display:flex;
   align-items:center;
-  gap:8px;
-  font-size: 13px;
-  font-weight: 700;
+  gap:10px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.65);
+  border: 1px solid rgba(15,23,42,.06);
+  box-shadow: 0 6px 16px rgba(15,23,42,.06);
+  font-size: 12px;
   color: var(--ink-sub);
-  cursor: pointer;
 }
-.admin-switch input{ 
-  width: 16px; height: 16px;
-  accent-color: var(--blue);
-}
-#btnKioskStart{ display:none; }
-
-/* ----- Pages ----- */
-.page{ display:none; animation: fadeIn .18s ease; padding: 16px; }
-.page.active{ display:block; }
-@keyframes fadeIn{ from{opacity:0; transform:translateY(4px)} to{opacity:1; transform:none} }
-
-/* Tab Navigation — top sticky bar */
-.tabs{
-  display:flex;
-  gap: 4px;
+.admin-switch input{ transform: translateY(1px); }
+#btnKioskStart{
+  display:none;
+  border:none;
+  border-radius: 999px;
   padding: 10px 12px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 71px;
-  z-index: 70;
+  font-weight: 800;
+  color:#0F172A;
+  background: linear-gradient(180deg, #FEF9C3 0%, #FDE68A 100%);
+  box-shadow: 0 8px 18px rgba(250,204,21,.25);
+  cursor:pointer;
+}
+
+/* ----- Pages / Tabs ----- */
+.page{ display:none; animation: fadeIn .2s ease; }
+.page.active{ display:block; }
+@keyframes fadeIn{ from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none} }
+
+/* Bottom Navigation (re-using existing .tabs markup) */
+.tabs{
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 50;
+
+  display:flex;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.78);
+  border: 1px solid rgba(15,23,42,.08);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 18px 40px rgba(15,23,42,.12);
 }
 .tab-btn{
   flex:1;
-  min-height: 40px;
-  border: none;
-  border-radius: var(--r-sm);
+  min-height: var(--tap);
+  border:none;
+  border-radius: 999px;
   background: transparent;
-  cursor: pointer;
+  cursor:pointer;
+
   display:flex;
   align-items:center;
   justify-content:center;
-  gap: 6px;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--ink-sub);
-  transition: background .12s, color .12s;
-}
-.tab-btn i{ font-size: 14px; }
-.tab-btn.active{
-  background: var(--blue-light);
-  color: var(--blue-dark);
-}
-.tab-btn:active{ opacity: .85; }
+  gap:8px;
 
-@media(max-width:480px){
-  .tab-btn span{ display:none; }
-  .tab-btn i{ font-size: 18px; }
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ink-sub);
+  transition: transform .12s ease, background .12s ease, color .12s ease;
+}
+.tab-btn i{ font-size: 16px; }
+.tab-btn.active{
+  background: linear-gradient(180deg, rgba(59,130,246,.18) 0%, rgba(59,130,246,.10) 100%);
+  color: var(--brand-blue-700);
+}
+.tab-btn:active{ transform: scale(.98); }
+
+/* On wider screens, make tabs inline (not fixed) */
+@media (min-width: 900px){
+  body{ padding-bottom: 14px; }
+  .tabs{
+    position: static;
+    margin: 8px 0 14px;
+    border-radius: 18px;
+    box-shadow: 0 10px 26px rgba(15,23,42,.10);
+  }
 }
 
 /* ----- Forms ----- */
@@ -189,109 +217,114 @@ header{
 label{
   display:block;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--ink-sub);
-  margin: 0 0 5px;
+  margin: 0 0 6px;
 }
 input, select, textarea{
   width:100%;
   min-height: var(--tap);
-  padding: 10px 12px;
-  border-radius: var(--r-sm);
-  border: 1px solid var(--border);
-  background: var(--surface);
+  padding: 12px 12px;
+  border-radius: var(--r-md);
+  border: 1px solid rgba(15,23,42,.10);
+  background: rgba(255,255,255,.85);
   color: var(--ink);
   outline: none;
   font-size: 14px;
-  font-family: inherit;
-  transition: border-color .15s, box-shadow .15s;
+  transition: box-shadow .15s ease, border-color .15s ease, transform .05s ease;
 }
-textarea{ min-height: 90px; resize: vertical; }
+textarea{ min-height: 110px; resize: vertical; }
 input:focus, select:focus, textarea:focus{
-  border-color: var(--border-focus);
-  box-shadow: 0 0 0 3px rgba(37,99,235,.10);
+  border-color: rgba(59,130,246,.55);
+  box-shadow: 0 0 0 4px rgba(59,130,246,.14);
+  background: #fff;
 }
-input::placeholder, textarea::placeholder{ color: var(--ink-muted); }
+input::placeholder, textarea::placeholder{ color: rgba(71,85,105,.7); }
 
-button{ min-height: var(--tap); font-family: inherit; cursor: pointer; }
+button{ min-height: var(--tap); }
 
 button.action-btn{
   width:100%;
-  border: none;
-  border-radius: var(--r);
-  padding: 13px 16px;
-  font-weight: 800;
+  border:none;
+  border-radius: 18px;
+  padding: 14px 14px;
+  font-weight: 900;
   font-size: 15px;
+  cursor:pointer;
   color: white;
-  background: var(--blue);
-  box-shadow: 0 2px 8px rgba(37,99,235,.25);
-  transition: filter .12s, transform .1s;
-  margin-top: 8px;
+  background: linear-gradient(180deg, var(--brand-blue) 0%, var(--brand-blue-700) 100%);
+  box-shadow: 0 12px 28px rgba(59,130,246,.24);
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
 }
-button.action-btn:hover{ filter: brightness(1.05); }
-button.action-btn:active{ transform: translateY(1px); filter: brightness(.97); }
-button.action-btn:disabled{ opacity: .5; cursor: not-allowed; }
+button.action-btn:hover{ filter: brightness(1.02); }
+button.action-btn:active{ transform: translateY(1px) scale(.995); box-shadow: 0 8px 22px rgba(59,130,246,.20); }
+button.action-btn:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+  box-shadow:none;
+}
 
 /* ----- Filter Chips ----- */
 .filter-container{
-  border-radius: var(--r);
-  background: var(--surface2);
-  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: rgba(255,255,255,.75);
+  border: 1px solid rgba(15,23,42,.08);
+  box-shadow: var(--shadow-soft);
   padding: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 .filter-row{
   display:flex;
   align-items:center;
-  gap:8px;
+  gap:10px;
   flex-wrap: wrap;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
-.filter-row:last-child{ margin-bottom: 0; }
 .filter-label{
-  font-size:11px;
-  font-weight:700;
+  font-size:12px;
+  font-weight:900;
   color: var(--ink-sub);
-  padding: 4px 8px;
-  border-radius: 6px;
-  background: var(--border);
-  flex-shrink: 0;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(59,130,246,.10);
 }
 .filter-group{ display:flex; gap:6px; flex-wrap: wrap; flex: 1; }
 
 .filter-chip{
-  padding: 7px 12px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--surface);
+  padding: 9px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(15,23,42,.08);
+  background: rgba(255,255,255,.85);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--ink-sub);
   cursor:pointer;
-  transition: background .1s, color .1s, border-color .1s;
+  transition: transform .12s ease, background .12s ease, color .12s ease;
 }
 .filter-chip.active{
-  background: var(--blue-light);
-  border-color: var(--border-focus);
-  color: var(--blue-dark);
+  background: linear-gradient(180deg, rgba(250,204,21,.35) 0%, rgba(250,204,21,.18) 100%);
+  border-color: rgba(250,204,21,.55);
+  color: #7C5A00;
 }
 
-/* ----- Student Cards ----- */
+/* ----- Student Cards (Parent-friendly) ----- */
 #studentListArea{
   display:grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 10px;
+  padding: 4px;
 }
 .student-card{
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  padding: 14px 10px;
-  box-shadow: var(--shadow-sm);
+  background: rgba(255,255,255,.92);
+  border: 1px solid rgba(15,23,42,.08);
+  border-radius: 20px;
+  padding: 14px 12px;
+  box-shadow: 0 10px 22px rgba(15,23,42,.08);
   cursor: pointer;
   position: relative;
-  transition: transform .12s, box-shadow .12s, border-color .12s;
-  height: 180px;
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+  height: 170px;
+
   display:flex;
   flex-direction: column;
   align-items: center;
@@ -300,25 +333,27 @@ button.action-btn:disabled{ opacity: .5; cursor: not-allowed; }
 }
 .student-card:hover{
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--border-focus);
+  border-color: rgba(59,130,246,.25);
+  box-shadow: 0 16px 30px rgba(15,23,42,.10);
 }
-.student-card:active{ transform: scale(.98); }
+.student-card:active{ transform: scale(.985); }
 
-.chk-wrapper{ position:absolute; top:8px; left:8px; }
-.list-chk{ width:18px; height:18px; accent-color: var(--blue); }
+.chk-wrapper{ position:absolute; top:10px; left:10px; }
+.list-chk{ width:20px; height:20px; accent-color: var(--brand-blue); }
 
-.profile-wrapper{ width: 72px; height: 72px; margin-bottom: 8px; }
+.profile-wrapper{ width: 64px; height: 64px; margin-bottom: 8px; }
 .profile-img{
   width:100%; height:100%;
-  border-radius: var(--r);
+  border-radius: 22px;
   object-fit: cover;
-  border: 1px solid var(--border);
+  background:#eee;
+  border: 1px solid rgba(15,23,42,.06);
+  box-shadow: 0 10px 20px rgba(15,23,42,.12);
 }
 .info-area{ width:100%; }
 .info-area div:first-child{
   font-size: 15px;
-  font-weight: 800;
+  font-weight: 900;
   letter-spacing: -0.2px;
 }
 .info-area small{
@@ -332,82 +367,79 @@ button.action-btn:disabled{ opacity: .5; cursor: not-allowed; }
 }
 .grade-tag{
   display:inline-block;
-  margin-left: 4px;
-  padding: 2px 6px;
-  border-radius: 6px;
+  margin-left: 6px;
+  padding: 3px 8px;
+  border-radius: 999px;
   font-size: 11px;
-  font-weight: 700;
-  color: var(--blue-dark);
-  background: var(--blue-light);
+  font-weight: 900;
+  color: #0F172A;
+  background: rgba(59,130,246,.12);
+  border: 1px solid rgba(59,130,246,.18);
 }
 
-/* ----- Modal ----- */
+/* ----- Modal (Glass) ----- */
 .modal-overlay{
   display:none;
   position: fixed;
   inset:0;
-  background: rgba(0,0,0,.45);
+  background: rgba(2,6,23,.52);
+  backdrop-filter: blur(6px);
   z-index: 100;
   justify-content:center;
   align-items:center;
-  padding: 16px;
+  padding: 18px;
 }
 .modal{
-  width: min(560px, 94vw);
+  width: min(560px, 92vw);
   max-height: 90vh;
   overflow:auto;
-  border-radius: var(--r-lg);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-lg);
-  padding: 20px;
+  border-radius: 26px;
+  background: rgba(255,255,255,.92);
+  border: 1px solid rgba(255,255,255,.55);
+  box-shadow: 0 26px 70px rgba(2,6,23,.35);
+  padding: 18px;
   position: relative;
 }
 .close-btn{
   position:absolute;
   right: 14px; top: 14px;
-  width: 36px; height: 36px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--surface2);
+  width: 42px; height: 42px;
+  border-radius: 999px;
+  border: 1px solid rgba(15,23,42,.08);
+  background: rgba(255,255,255,.75);
   cursor:pointer;
-  font-size: 20px;
+  font-size: 22px;
   color: var(--ink-sub);
-  display:flex; align-items:center; justify-content:center;
-  line-height:1;
 }
 .modal-header-profile{
   text-align:center;
-  padding-bottom: 14px;
+  padding-bottom: 12px;
   margin-bottom: 12px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(15,23,42,.08);
 }
 .modal-tab-nav{
   display:flex;
-  gap: 4px;
-  padding: 4px;
-  border-radius: var(--r-sm);
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  margin: 10px 0 14px;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 18px;
+  background: rgba(59,130,246,.08);
+  border: 1px solid rgba(59,130,246,.10);
+  margin: 10px 0 12px;
 }
 .modal-tab-btn{
   flex:1;
   border:none;
-  border-radius: 8px;
+  border-radius: 14px;
   background: transparent;
-  padding: 10px 8px;
-  font-weight: 700;
-  font-size: 13px;
+  padding: 12px 10px;
+  font-weight: 900;
   color: var(--ink-sub);
   cursor:pointer;
-  font-family: inherit;
-  transition: background .1s, color .1s;
 }
 .modal-tab-btn.active{
-  background: var(--surface);
-  color: var(--blue-dark);
-  box-shadow: var(--shadow-sm);
+  background: rgba(255,255,255,.85);
+  color: var(--brand-blue-700);
+  box-shadow: 0 10px 18px rgba(15,23,42,.08);
 }
 .modal-tab-pane{ display:none; }
 .modal-tab-pane.active{ display:block; }
@@ -415,72 +447,74 @@ button.action-btn:disabled{ opacity: .5; cursor: not-allowed; }
 .stat-box{
   display:flex;
   gap: 10px;
-  background: var(--blue-light);
-  border: 1px solid var(--border-focus);
-  border-radius: var(--r);
+  background: rgba(59,130,246,.08);
+  border: 1px solid rgba(59,130,246,.12);
+  border-radius: 18px;
   padding: 12px;
-  margin-bottom: 14px;
 }
-.stat-item{ flex:1; text-align:center; }
-.stat-num{ font-size: 22px; font-weight: 900; color: var(--blue-dark); }
+.stat-num{ font-size: 20px; font-weight: 950; color: var(--brand-blue-700); }
 
-/* Contact buttons */
-.contact-row{ display:flex; justify-content:center; align-items:center; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
-.contact-group{ display:flex; align-items:center; gap: 8px; }
-.contact-label{ font-size: 11px; font-weight: 700; color: var(--ink-muted); }
+/* Contact buttons (keep existing classes) */
+.contact-row{ display:flex; justify-content:center; align-items:center; gap: 14px; flex-wrap: wrap; }
 .contact-btn{
-  width: 36px; height: 36px;
-  border-radius: 8px;
+  width: 38px; height: 38px;
+  border-radius: 999px;
   display:flex; align-items:center; justify-content:center;
-  border: 1px solid var(--border);
-  text-decoration: none;
-  font-size: 15px;
-  transition: opacity .1s;
+  border: 1px solid rgba(15,23,42,.08);
+  box-shadow: 0 10px 18px rgba(15,23,42,.10);
 }
-.contact-btn:active{ opacity: .7; }
-.btn-call{ background: var(--green-bg); color: var(--green); }
-.btn-sms{ background: var(--blue-light); color: var(--blue); }
-.btn-kakao{ background: #FFFDE7; color: #3c1e1e; }
+.btn-call{ background: rgba(34,197,94,.12); color: #166534; }
+.btn-sms{ background: rgba(59,130,246,.12); color: #1D4ED8; }
+.btn-kakao{ background: rgba(250,204,21,.25); color: #3c1e1e; }
 
-/* ----- Toast ----- */
+/* ----- Toast (cute) ----- */
 .toast{
   position: fixed;
   left:50%;
-  bottom: 24px;
+  bottom: calc(120px + env(safe-area-inset-bottom));
   transform: translateX(-50%) translateY(10px);
   opacity: 0;
   pointer-events:none;
   z-index: 9999;
-  max-width: calc(100vw - 32px);
+  max-width: calc(100vw - 24px);
+
   display:flex;
   align-items:center;
-  gap:8px;
-  background: var(--ink);
-  border-radius: 10px;
-  padding: 12px 16px;
-  color: #fff;
-  font-size: 14px;
-  font-weight: 700;
-  box-shadow: var(--shadow-lg);
-  transition: opacity .16s ease, transform .16s ease;
+  gap:10px;
+
+  background: rgba(255,255,255,.88);
+  border: 1px solid rgba(15,23,42,.10);
+  box-shadow: 0 18px 40px rgba(2,6,23,.20);
+  border-radius: 999px;
+  padding: 12px 14px;
+  color: var(--ink);
+  font-weight: 800;
 }
-.toast.show{ opacity:1; transform: translateX(-50%) translateY(0); }
-.toast .dot{ width:8px; height:8px; border-radius:999px; background: #4ADE80; flex-shrink:0; }
-.toast.error .dot{ background: #F87171; }
-.toast.warn .dot{ background: #FCD34D; }
+.toast.show{ opacity:1; transform: translateX(-50%) translateY(0); transition: opacity .16s ease, transform .16s ease; }
+.toast .dot{ width:10px; height:10px; border-radius:999px; background: var(--success); }
+.toast.error .dot{ background: var(--danger); }
+.toast.warn .dot{ background: var(--warning); }
 
 /* =========================================================
-   Kiosk Mode (출석부 태블릿 모드)
+   Tablet Kiosk Mode (Attendance)
+   - Big 3D cards
+   - Minimal distractions
    ========================================================= */
 
 body.kiosk-mode{
-  background: #F0F4F8;
+  padding: 0;
+  background: radial-gradient(1100px 600px at 20% -10%, #DBEAFE 0%, rgba(219,234,254,0) 60%),
+              radial-gradient(900px 500px at 95% 0%, #FEF9C3 0%, rgba(254,249,195,0) 55%),
+              linear-gradient(180deg, #F8FAFC 0%, #EEF2FF 100%);
 }
 
 body.kiosk-mode .container{
   max-width: 100%;
   background: transparent;
-  min-height: 100vh;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 12px;
 }
 
 body.kiosk-mode header,
@@ -492,10 +526,11 @@ body.kiosk-mode #register,
 body.kiosk-mode #calendar{
   display:none !important;
 }
-body.kiosk-mode #list{ display:block !important; padding: 12px; }
+body.kiosk-mode #list{ display:block !important; }
 body.kiosk-mode #studentListArea{
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 18px;
+  padding: 8px;
 }
 
 /* Kiosk header category chips */
@@ -504,10 +539,13 @@ body.kiosk-mode #studentListArea{
   position: sticky;
   top: 0;
   z-index: 200;
-  padding: 10px 12px;
-  margin-bottom: 12px;
-  background: rgba(255,255,255,.95);
-  border-bottom: 1px solid var(--border);
+  padding: 12px 10px;
+  margin: 0 0 12px;
+  border-radius: 22px;
+  background: rgba(255,255,255,.82);
+  border: 1px solid rgba(15,23,42,.08);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 16px 40px rgba(15,23,42,.10);
   justify-content:center;
   gap: 8px;
   flex-wrap: wrap;
@@ -516,259 +554,257 @@ body.kiosk-mode .kiosk-header{ display:flex; }
 
 .k-filter-btn{
   border:none;
-  border-radius: var(--r-sm);
-  padding: 10px 18px;
-  font-size: 14px;
-  font-weight: 800;
+  border-radius: 999px;
+  padding: 12px 18px;
+  font-size: 15px;
+  font-weight: 950;
   cursor:pointer;
   color: var(--ink-sub);
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  transition: all .12s;
-  font-family: inherit;
+  background: rgba(59,130,246,.08);
+  border: 1px solid rgba(59,130,246,.12);
+  transition: transform .12s ease, background .12s ease;
 }
 .k-filter-btn.active{
-  background: var(--blue);
-  border-color: var(--blue);
-  color: #fff;
+  background: linear-gradient(180deg, rgba(250,204,21,.55) 0%, rgba(250,204,21,.28) 100%);
+  border-color: rgba(250,204,21,.60);
+  color: #7C5A00;
+  transform: scale(1.03);
 }
 
 /* Kiosk Exit button */
 .kiosk-exit-btn{
   position: fixed;
-  left: 16px;
-  bottom: 16px;
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
+  right: 18px;
+  top: 18px;
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
   display:none;
   align-items:center;
   justify-content:center;
   cursor:pointer;
   z-index: 99999;
-  background: rgba(255,255,255,.6);
-  border: 1px solid var(--border);
-  color: var(--ink-muted);
-  font-size: 18px;
-  opacity: 0.35;
+
+  background: rgba(255,255,255,.72);
+  border: 1px solid rgba(15,23,42,.10);
+  box-shadow: 0 18px 40px rgba(2,6,23,.18);
+  color: var(--brand-blue-700);
 }
 body.kiosk-mode .kiosk-exit-btn{ display:flex; }
 
-/* Kiosk student cards */
+/* Kiosk 3D cards (tap = attendance) */
 body.kiosk-mode .student-card{
-  height: 300px;
-  padding: 20px 14px;
-  border-radius: var(--r-lg);
-  background: var(--surface);
-  border: 2px solid var(--border);
-  box-shadow: 0 8px 0 #CBD5E1, 0 16px 32px rgba(0,0,0,.10);
-  transition: all .15s cubic-bezier(.25,.8,.25,1);
-  cursor: pointer;
+  height: 360px;
+  padding: 18px 16px;
+  border-radius: 28px;
+  background: linear-gradient(180deg, rgba(255,255,255,.96) 0%, rgba(255,255,255,.82) 100%);
+  border: 1px solid rgba(15,23,42,.10);
+
+  box-shadow:
+    0 16px 0 rgba(148,163,184,.35),
+    0 28px 45px rgba(15,23,42,.18);
 }
 body.kiosk-mode .student-card:active{
-  transform: translateY(6px);
-  box-shadow: 0 2px 0 #CBD5E1, 0 6px 16px rgba(0,0,0,.10);
+  transform: translateY(10px);
+  box-shadow:
+    0 6px 0 rgba(148,163,184,.35),
+    0 18px 32px rgba(15,23,42,.14);
 }
 
-/* 미등원 */
-body.kiosk-mode .student-card.missing{
-  background: #fff;
-  border-color: var(--border);
-  box-shadow: 0 8px 0 #CBD5E1, 0 16px 32px rgba(0,0,0,.08);
-}
-
-/* 등원완료 */
+/* Arrived state (soft green) */
 body.kiosk-mode .student-card.arrived{
-  background: linear-gradient(160deg, #fff 40%, #DCFCE7 100%);
-  border-color: #86EFAC;
-  box-shadow: 0 8px 0 #4ADE80, 0 16px 32px rgba(22,163,74,.14);
+  background: linear-gradient(180deg, rgba(34,197,94,.18) 0%, rgba(255,255,255,.86) 70%);
+  border-color: rgba(34,197,94,.25);
 }
 
-/* 하원완료 */
-body.kiosk-mode .student-card.left{
-  background: var(--surface2);
-  border: 2px dashed #CBD5E1;
-  box-shadow: none;
-  opacity: 0.55;
-  filter: grayscale(.6);
-  transform: scale(.96);
-}
-
-/* 키오스크 상태 pill */
+/* ----- Kiosk status (멀리서도 구분) ----- */
 .kiosk-pill{
   position:absolute;
-  top: 12px;
-  right: 12px;
-  padding: 5px 10px;
-  border-radius: 8px;
-  font-weight: 800;
-  font-size: 12px;
-  border: 1px solid var(--border);
-  background: var(--surface2);
-  color: var(--ink-sub);
+  top: 14px;
+  right: 14px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-weight: 950;
+  font-size: 14px;
+  letter-spacing: -0.2px;
+  border: 1px solid rgba(15,23,42,.10);
+  background: rgba(255,255,255,.85);
+  box-shadow: 0 10px 20px rgba(15,23,42,.10);
 }
-.kiosk-pill.arrived{ background: #DCFCE7; border-color: #86EFAC; color: var(--green); }
-.kiosk-pill.left{ background: var(--surface2); color: var(--ink-muted); }
+.kiosk-pill.missing{ background: rgba(148,163,184,.22); border-color: rgba(148,163,184,.32); color:#334155; }
+.kiosk-pill.arrived{ background: rgba(34,197,94,.22); border-color: rgba(34,197,94,.32); color:#14532d; }
+.kiosk-pill.left{ background: rgba(100,116,139,.18); border-color: rgba(100,116,139,.28); color:#334155; }
 
 .kiosk-hint{
   margin-top: 10px;
   width:100%;
-  padding: 8px 10px;
-  border-radius: var(--r-sm);
-  font-weight: 700;
-  font-size: 12px;
+  padding: 10px 12px;
+  border-radius: 18px;
+  font-weight: 900;
+  font-size: 14px;
   color: var(--ink-sub);
-  background: var(--surface2);
-  border: 1px solid var(--border);
+  background: rgba(59,130,246,.08);
+  border: 1px solid rgba(59,130,246,.10);
 }
-.kiosk-hint strong{ color: var(--blue); }
+.kiosk-hint strong{ color: var(--brand-blue-700); }
 
-/* 키오스크 큰 사진 */
-body.kiosk-mode .profile-wrapper{ width: 130px; height: 130px; margin-bottom: 12px; }
-body.kiosk-mode .profile-img{ border-radius: var(--r); }
-body.kiosk-mode .info-area div:first-child{ font-size: 26px; letter-spacing: -.4px; }
-body.kiosk-mode .info-area small{ font-size: 13px; }
+body.kiosk-mode .student-card.missing{
+  background: linear-gradient(180deg, rgba(148,163,184,.18) 0%, rgba(255,255,255,.86) 70%);
+  border-color: rgba(148,163,184,.30);
+  filter: saturate(.92);
+}
+body.kiosk-mode .student-card.left{
+  background: linear-gradient(180deg, rgba(100,116,139,.14) 0%, rgba(255,255,255,.82) 75%);
+  border-color: rgba(100,116,139,.26);
+  opacity: .72;
+  filter: grayscale(.22);
+}
+body.kiosk-mode .student-card.left .profile-img{ filter: grayscale(.35); opacity:.9; }
 
-/* 키오스크 등원/하원 버튼 */
+/* Bigger profile + name */
+body.kiosk-mode .profile-wrapper{ width: 150px; height: 150px; margin-bottom: 14px; }
+body.kiosk-mode .profile-img{ border-radius: 28px; }
+body.kiosk-mode .info-area div:first-child{ font-size: 28px; }
+body.kiosk-mode .info-area small{ font-size: 14px; }
+
+/* Keep existing kiosk buttons if your JS injects them */
 body.kiosk-mode .kiosk-btn-group{
   display:flex;
-  gap: 8px;
+  gap: 10px;
   width:100%;
   margin-top: auto;
 }
 .k-btn{
   flex:1;
   border:none;
-  border-radius: var(--r-sm);
-  padding: 13px 0;
-  font-size: 15px;
-  font-weight: 800;
+  border-radius: 18px;
+  padding: 14px 0;
+  font-size: 16px;
+  font-weight: 950;
   cursor:pointer;
-  font-family: inherit;
-  transition: filter .1s, transform .1s;
+  box-shadow: 0 14px 26px rgba(2,6,23,.10);
 }
-.k-btn:active{ transform: translateY(2px); filter: brightness(.92); }
-.k-btn-in{
-  background: #FACC15;
-  color: #3B2A00;
-  border: 1px solid #EAB308;
-  box-shadow: 0 4px 0 #CA8A04;
+.k-btn-in{ background: linear-gradient(180deg, rgba(250,204,21,.80) 0%, rgba(250,204,21,.55) 100%); color:#7C5A00; }
+.k-btn-out{ background: rgba(59,130,246,.12); color: var(--brand-blue-700); border: 1px solid rgba(59,130,246,.18); }
+
+.k-btn:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+  box-shadow:none;
 }
-.k-btn-out{
-  background: var(--surface2);
-  color: var(--ink-sub);
-  border: 1px solid var(--border);
-  box-shadow: 0 4px 0 #CBD5E1;
-}
-.k-btn:disabled{ opacity:.45; cursor:not-allowed; box-shadow:none; }
+
+/* Small tweaks */
+.dept-badge{ border-radius: 999px; padding: 3px 8px; font-weight: 900; }
 
 
-/* ===== Calendar ===== */
+/* ===== Calendar (restored & modernized) ===== */
 #calendar .calendar-controls{
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap: 10px;
-  padding: 10px 12px;
-  border-radius: var(--r);
-  background: var(--surface2);
-  border: 1px solid var(--border);
+  padding: 12px;
+  border-radius: var(--r-lg);
+  background: rgba(255,255,255,.78);
+  border: 1px solid rgba(15,23,42,.08);
+  box-shadow: var(--shadow-soft);
   margin-bottom: 12px;
 }
 #calendar .cal-btn{
-  min-height: 40px;
-  padding: 8px 14px;
-  border: 1px solid var(--border);
-  border-radius: var(--r-sm);
-  font-weight: 800;
+  min-height: var(--tap);
+  padding: 10px 12px;
+  border:none;
+  border-radius: 16px;
+  font-weight: 950;
   cursor:pointer;
-  background: var(--surface);
-  color: var(--blue);
-  font-family: inherit;
+  background: rgba(59,130,246,.10);
+  color: var(--brand-blue-700);
 }
 #calendar .current-date{
-  font-size: 17px;
-  font-weight: 800;
+  font-size: 18px;
+  font-weight: 950;
+  letter-spacing: -0.3px;
   color: var(--ink);
 }
 
 .calendar-grid{
   display:grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
+  gap: 8px;
 }
 .day-name{
   text-align:center;
-  font-weight: 700;
+  font-weight: 950;
   font-size: 12px;
   color: var(--ink-sub);
   padding: 6px 0;
 }
 .day-cell{
-  border-radius: var(--r-sm);
-  border: 1px solid var(--border);
-  background: var(--surface);
-  min-height: 46px;
-  padding: 5px 4px 7px;
+  border-radius: 16px;
+  border: 1px solid rgba(15,23,42,.08);
+  background: rgba(255,255,255,.86);
+  box-shadow: 0 8px 18px rgba(15,23,42,.06);
+  min-height: 54px;
+  padding: 6px 6px 10px;
   cursor:pointer;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:flex-start;
-  transition: border-color .1s, background .1s;
+  transition: transform .12s ease, box-shadow .12s ease;
 }
-.day-cell:hover{ background: var(--surface2); border-color: var(--border-focus); }
+.day-cell:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(15,23,42,.08);
+}
 .day-num{
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 950;
   color: var(--ink);
 }
-.day-cell.today{ background: var(--blue-light); border-color: var(--border-focus); }
-.day-cell.today .day-num{ color: var(--blue-dark); font-weight: 900; }
-.event-dot{
-  width: 6px; height: 6px;
-  border-radius: 999px;
-  margin-top: 3px;
+.day-cell.selected{
+  outline: 4px solid rgba(59,130,246,.18);
+  border-color: rgba(59,130,246,.35);
 }
-.dot-schedule{ background: var(--blue); }
-.dot-birthday{ background: var(--yellow); }
+.event-dot{
+  width: 7px; height: 7px;
+  border-radius: 999px;
+  margin-top: 4px;
+}
+.dot-schedule{ background: rgba(59,130,246,.90); }
+.dot-birthday{ background: rgba(250,204,21,.95); }
 
 #dateDetailArea{
   margin-top: 12px;
-  border-radius: var(--r);
-  background: var(--surface);
-  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: rgba(255,255,255,.78);
+  border: 1px solid rgba(15,23,42,.08);
+  box-shadow: var(--shadow-soft);
   padding: 12px;
 }
 .view-mode-group{
   display:flex;
-  gap: 4px;
+  gap: 8px;
+  justify-content:center;
+  flex-wrap: wrap;
   margin-bottom: 10px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--r-sm);
-  padding: 4px;
 }
 .view-mode-btn{
-  flex:1;
   border:none;
-  border-radius: 7px;
-  padding: 8px 0;
-  font-weight: 700;
-  font-size: 13px;
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-weight: 950;
   cursor:pointer;
-  background: transparent;
+  background: rgba(59,130,246,.08);
   color: var(--ink-sub);
-  font-family: inherit;
-  transition: background .1s, color .1s;
 }
 .view-mode-btn.active{
-  background: var(--surface);
-  color: var(--blue-dark);
-  box-shadow: var(--shadow-sm);
+  background: linear-gradient(180deg, rgba(250,204,21,.55) 0%, rgba(250,204,21,.26) 100%);
+  color: #7C5A00;
+  border: 1px solid rgba(250,204,21,.55);
 }
 
-/* ===== Admin mode: list layout ===== */
+/* ===== Admin selection layout fixes (원생관리) ===== */
 body.show-admin #studentListArea{
   grid-template-columns: 1fr !important;
 }
@@ -781,246 +817,454 @@ body.show-admin .student-card{
   padding: 12px 14px;
 }
 body.show-admin .profile-wrapper{
-  width: 52px !important;
-  height: 52px !important;
+  width: 56px !important;
+  height: 56px !important;
   margin: 0 !important;
-  flex-shrink: 0;
 }
-body.show-admin .profile-img{ border-radius: var(--r-sm) !important; }
+body.show-admin .profile-img{ border-radius: 18px !important; }
 body.show-admin .info-area{ width: auto !important; flex: 1; }
 body.show-admin .chk-wrapper{
   position: static !important;
   margin-left: auto;
+  width: auto;
   display:flex;
   align-items:center;
 }
-body.show-admin .list-chk{ width: 20px; height: 20px; }
+body.show-admin .list-chk{
+  width: 22px;
+  height: 22px;
+}
 body.show-admin #selectedCount{
-  padding: 4px 8px;
-  border-radius: 6px;
-  background: var(--blue-light);
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--blue-dark);
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(59,130,246,.10);
+  border: 1px solid rgba(59,130,246,.12);
 }
-body.show-admin #selectAll{ width: 18px; height: 18px; accent-color: var(--blue); }
-
-/* 선생님 모드 카드 상태 색상 (리스트뷰) */
-body.show-admin .student-card.arrived{
-  border-left: 3px solid var(--green);
-  background: #FAFFFE;
-}
-body.show-admin .student-card.left{
-  opacity: 0.6;
-  background: var(--surface2);
+body.show-admin #selectAll{
+  width: 20px;
+  height: 20px;
+  accent-color: var(--brand-blue);
 }
 
-/* ===== Print ===== */
+/* ===== Cute sparkle (cat accent) ===== */
+.sparkle-fx{
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  pointer-events:none;
+  animation: sparkle-pop .55s ease-out forwards;
+  filter: drop-shadow(0 10px 14px rgba(250,204,21,.25));
+}
+@keyframes sparkle-pop{
+  0%{ transform: translate(-50%,-50%) scale(.2); opacity:0; }
+  35%{ opacity:1; transform: translate(-50%,-50%) scale(1); }
+  100%{ opacity:0; transform: translate(-50%,-80%) scale(.8); }
+}
+
+
+/* =========================
+   KIOSK: True metal/plastic card feel + remove ghost print text
+   ========================= */
+
+/* Hide print area during normal use (it was showing at bottom) */
 #printArea{ display:none !important; }
+
+/* Print support: show printArea only when printing */
 @media print{
   body{ background:#fff !important; padding:0 !important; }
   body > *:not(#printArea){ display:none !important; }
-  #printArea{ display:block !important; position:static !important; width:210mm !important; padding:10mm !important; }
+  #printArea{
+    display:block !important;
+    position: static !important;
+    width: 210mm !important;
+    padding: 10mm !important;
+  }
 }
 
-/* ===== Dept badge ===== */
-.dept-badge{
-  display:inline-block;
-  padding: 2px 6px;
-  border-radius: 5px;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--blue-dark);
-  background: var(--blue-light);
-  margin-left: 4px;
+/* Remove any watermark/label that looks like floating text */
+.card-label{ display:none !important; }
+
+/* Stronger "kiosk" look */
+body.kiosk-mode{
+  background:
+    radial-gradient(900px 540px at 15% 0%, rgba(59,130,246,.28) 0%, rgba(59,130,246,0) 55%),
+    radial-gradient(720px 520px at 85% 10%, rgba(250,204,21,.30) 0%, rgba(250,204,21,0) 55%),
+    linear-gradient(180deg, #F8FAFC 0%, #EEF2FF 100%) !important;
 }
 
-/* ===== Admin toolbar (선생님 모드 체크박스 행) ===== */
-.admin-toolbar{
-  display:flex;
-  align-items:center;
-  gap: 8px;
-  padding: 8px 0 12px;
-  flex-wrap: wrap;
-}
-#bulkActionBtn{
-  display:none;
-  background: var(--blue);
-  color: #fff;
-  border: none;
-  border-radius: var(--r-sm);
-  padding: 8px 14px;
-  font-weight: 700;
-  font-size: 13px;
-  cursor:pointer;
-  font-family: inherit;
-}
-
-/* ===== Settlement / notice panel ===== */
-.settlement-box{
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  padding: 14px;
-  margin-bottom: 12px;
-}
-.settlement-title{
-  font-size: 14px;
-  font-weight: 800;
-  color: var(--blue-dark);
-  margin-bottom: 10px;
-  display:flex; align-items:center; gap:6px;
-}
-.modal-action-row{
-  display:flex;
-  gap: 8px;
-  margin-top: 10px;
-  flex-wrap: wrap;
-}
-.modal-action-row .action-btn{
-  flex:1;
-  margin-top: 0 !important;
-  font-size: 13px;
-  padding: 10px;
-  min-height: 40px;
-}
-
-/* ===== Score/Counsel section ===== */
-.score-input-group{
-  display:flex;
-  gap: 6px;
-}
-.score-input-group input{ min-height: 38px; }
-
-/* ===== Alrimjang daily panel (알림장) ===== */
-.notice-panel{
-  background: var(--yellow-light);
-  border: 1px solid #FCD34D;
-  border-radius: var(--r);
-  padding: 14px;
-}
-.notice-panel h4{
-  font-size: 14px;
-  font-weight: 800;
-  color: var(--orange);
-  margin-bottom: 10px;
-  display:flex; align-items:center; gap:6px;
-}
-.notice-btn-row{
-  display:grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
-  margin-top: 8px;
-}
-.notice-btn-row .action-btn{
-  margin-top: 0 !important;
-  font-size: 12px;
-  padding: 9px 4px;
-  min-height: 38px;
-}
-
-/* ===== Register section header ===== */
-.section-title{
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--ink-sub);
-  text-transform: uppercase;
-  letter-spacing: .5px;
-  margin: 16px 0 10px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid var(--border);
-}
-
-/* ===== General utility ===== */
-.card-anim-active{ animation: card-bounce .35s ease; }
-@keyframes card-bounce{
-  0%{ transform: scale(1); }
-  40%{ transform: scale(.96); }
-  70%{ transform: scale(1.02); }
-  100%{ transform: scale(1); }
-}
-
-/* ===== 학부모 알림장 뷰 (notice mode) ===== */
-.notice-card{
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  padding: 20px;
-  margin-bottom: 14px;
-  box-shadow: var(--shadow-sm);
-}
-.notice-card h3{
-  font-size: 16px;
-  font-weight: 800;
-  color: var(--ink);
-  margin-bottom: 12px;
-  display:flex; align-items:center; gap:6px;
-}
-
-/* ===== Calendar checkbox row ===== */
-#calendar .filter-group{
-  display:flex;
-  justify-content: center;
-  gap: 20px;
-  margin-bottom: 12px;
-}
-#calendar .filter-group label{
-  display:inline-flex;
-  align-items:center;
-  gap: 6px;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--ink-sub);
+/* Kiosk cards: metal + plastic hybrid */
+body.kiosk-mode .student-card{
+  height: 380px;
+  border-radius: 30px;
+  padding: 18px 16px;
   cursor: pointer;
-  width: auto;
-  margin: 0;
-}
-#calendar .filter-group input[type="checkbox"]{
-  width: 18px;
-  height: 18px;
-  min-height: 0;
-  margin: 0;
-  accent-color: var(--blue);
-}
 
-/* ===== Settings modal ===== */
-#settingsModal .action-btn{
-  font-size: 14px;
-  padding: 12px;
-  margin-top: 0 !important;
-  text-align: left;
-  display:flex;
-  align-items:center;
-  gap: 8px;
+  /* "metal shell" */
+  background:
+    radial-gradient(140px 120px at 25% 22%, rgba(255,255,255,.95) 0%, rgba(255,255,255,0) 60%),
+    radial-gradient(260px 180px at 70% 28%, rgba(255,255,255,.55) 0%, rgba(255,255,255,0) 62%),
+    linear-gradient(135deg, rgba(15,23,42,.10) 0%, rgba(255,255,255,.92) 22%, rgba(255,255,255,.86) 60%, rgba(15,23,42,.10) 100%);
+
+  border: 1px solid rgba(15,23,42,.12);
+
+  /* 3D plate + floor shadow */
+  box-shadow:
+    0 18px 0 rgba(148,163,184,.30),
+    0 34px 54px rgba(2,6,23,.22);
+
+  position: relative;
+  overflow: hidden;
+  transform: translateZ(0);
 }
 
-/* ===== Brand overrides for sticky header ===== */
-.brand-mark{
-  width: 40px !important;
-  height: 40px !important;
-}
-.brand-title strong{ font-size: 15px !important; }
-.brand-title span{ font-size: 12px !important; }
-.brand{ gap: 10px !important; }
-
-/* ===== Register padding ===== */
-#register{ padding-bottom: 24px !important; }
-
-/* 선생님 모드 admin-only 표시 */
-body.show-admin .admin-only{
-  display: inline-flex !important;
+/* glossy highlight strip */
+body.kiosk-mode .student-card::before{
+  content:"";
+  position:absolute;
+  inset: -40% -30%;
+  background: linear-gradient(115deg,
+    rgba(255,255,255,0) 20%,
+    rgba(255,255,255,.28) 38%,
+    rgba(255,255,255,0) 58%);
+  transform: rotate(12deg);
+  opacity: .9;
+  pointer-events:none;
 }
 
-/* print table */
-.print-table{ width:100%; border-collapse:collapse; margin-top:16px; }
-.print-table th, .print-table td{ border:1px solid #ccc; padding:6px 8px; font-size:12px; text-align:left; }
-.print-table th{ background:#f3f4f6; font-weight:700; }
+/* subtle noise to feel "plastic" */
+body.kiosk-mode .student-card::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background-image:
+    radial-gradient(rgba(15,23,42,.06) 1px, rgba(255,255,255,0) 1px);
+  background-size: 18px 18px;
+  opacity: .06;
+  mix-blend-mode: multiply;
+  pointer-events:none;
+}
 
-/* noticeModeSection wrapper */
-#noticeModeSection{
-  max-width: 540px;
-  margin: 0 auto;
-  padding: 20px 16px;
+body.kiosk-mode .student-card:active{
+  transform: translateY(12px);
+  box-shadow:
+    0 8px 0 rgba(148,163,184,.28),
+    0 22px 36px rgba(2,6,23,.18);
+}
+
+/* Arrived state: green glow rim */
+body.kiosk-mode .student-card.arrived{
+  border-color: rgba(34,197,94,.30) !important;
+  box-shadow:
+    0 18px 0 rgba(148,163,184,.28),
+    0 34px 54px rgba(2,6,23,.20),
+    0 0 0 2px rgba(34,197,94,.18) inset,
+    0 0 26px rgba(34,197,94,.14);
+}
+
+/* Profile: inset frame like ID */
+body.kiosk-mode .profile-wrapper{
+  width: 154px;
+  height: 154px;
+  border-radius: 26px;
+  padding: 6px;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.9) 0%, rgba(15,23,42,.08) 100%);
+  box-shadow:
+    0 10px 22px rgba(2,6,23,.20),
+    0 0 0 1px rgba(15,23,42,.10) inset;
+}
+body.kiosk-mode .profile-img{
+  border-radius: 20px;
+}
+
+/* Title typography */
+body.kiosk-mode .info-area div:first-child{
+  font-size: 30px !important;
+  letter-spacing: -0.6px;
+}
+body.kiosk-mode .info-area small{
+  font-size: 14px !important;
+  color: rgba(71,85,105,.85) !important;
+}
+
+/* Buttons: tactile plastic/metal */
+body.kiosk-mode .kiosk-btn-group{ gap: 12px; }
+
+.k-btn{
+  border-radius: 20px !important;
+  font-size: 17px !important;
+  font-weight: 950 !important;
+  letter-spacing: -0.2px;
+  position: relative;
+  overflow: hidden;
+}
+
+.k-btn::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background: linear-gradient(180deg, rgba(255,255,255,.55) 0%, rgba(255,255,255,0) 55%);
+  opacity:.55;
+  pointer-events:none;
+}
+
+/* "Gold plastic" for 등원 */
+.k-btn-in{
+  background:
+    radial-gradient(120px 60px at 30% 20%, rgba(255,255,255,.75) 0%, rgba(255,255,255,0) 60%),
+    linear-gradient(135deg, rgba(161,98,7,.22) 0%, rgba(250,204,21,.95) 26%, rgba(250,204,21,.62) 70%, rgba(161,98,7,.22) 100%) !important;
+  color: #3B2A00 !important;
+  border: 1px solid rgba(161,98,7,.22) !important;
+  box-shadow:
+    0 10px 0 rgba(161,98,7,.20),
+    0 18px 28px rgba(2,6,23,.18) !important;
+}
+
+/* "Steel" for 하원 */
+.k-btn-out{
+  background:
+    radial-gradient(120px 60px at 30% 20%, rgba(255,255,255,.8) 0%, rgba(255,255,255,0) 60%),
+    linear-gradient(135deg, rgba(15,23,42,.18) 0%, rgba(226,232,240,.95) 28%, rgba(203,213,225,.70) 70%, rgba(15,23,42,.14) 100%) !important;
+  color: #0F172A !important;
+  border: 1px solid rgba(15,23,42,.14) !important;
+  box-shadow:
+    0 10px 0 rgba(15,23,42,.12),
+    0 18px 28px rgba(2,6,23,.16) !important;
+}
+
+.k-btn:active{
+  transform: translateY(6px) !important;
+  box-shadow: none !important;
+}
+
+/* Kiosk exit button: clearer */
+/* 종료 버튼 위치 수정 (상단 오른쪽) */
+body.kiosk-mode .kiosk-exit-btn {
+    display: flex !important;
+    top: 25px !important;    /* 위쪽으로 이동 */
+    right: 25px !important;  /* 오른쪽 벽에 붙임 */
+    bottom: auto !important; /* 아래쪽 해제 */
+    left: auto !important;   /* 왼쪽 해제 */
+    width: 45px; 
+    height: 45px;
+    opacity: 0.4; /* 평소엔 연하게 */
+}
+/* Kiosk header chips slightly more premium */
+body.kiosk-mode .kiosk-header{
+  border-radius: 26px !important;
+}
+/* [수정] 신규 등록 화면 하단 여백 추가 (버튼 가림 방지) */
+    #register {
+        padding-bottom: 90px !important;
+    }
+
+    /* [수정] 선생님 모드 시 설정 버튼 강제 표시 */
+    body.show-admin .admin-only {
+        display: inline-flex !important;
+    }
+/* =========================================
+   1. 메뉴 버튼 상단 배치 & 모바일 최적화
+   ========================================= */
+.tabs {
+    position: sticky; /* 스크롤 내려도 상단에 고정 */
+    top: 0;
+    z-index: 90;
+    margin: 0 0 15px 0;
+    padding: 8px;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 0 0 16px 16px; /* 아래쪽만 둥글게 */
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    width: 100%; /* 가로 꽉 차게 */
+    left: 0;
+}
+/* 탭 버튼 스타일 단순화 */
+.tab-btn {
+    border-radius: 12px;
+    font-size: 14px;
+    padding: 8px 0; /* 높이 조절 */
+}
+
+/* 본문 여백 재조정 (버튼이 위로 갔으므로 아래 여백 제거) */
+body { padding-bottom: 20px !important; }
+#register { padding-bottom: 20px !important; }
+
+
+/* =========================================
+   2. [출석부 모드] 3D 입체 버튼 & 카드 디자인
+   ========================================= */
+
+/* (1) 분류 버튼 (전체, 미취학...) - 입체감 강화 */
+.kiosk-header {
+    gap: 8px;
+    padding: 10px;
+    background: transparent;
+    box-shadow: none;
+    border: none;
+}
+.k-filter-btn {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-bottom: 4px solid #94a3b8; /* 두꺼운 하단 테두리로 3D 효과 */
+    border-radius: 12px;
+    color: #64748b;
+    padding: 12px 16px;
+    font-size: 16px;
+    font-weight: 800;
+    transform: translateY(0);
+    transition: all 0.1s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+.k-filter-btn:active, 
+.k-filter-btn.active {
+    background: #ffeb3b; /* 쨍한 노란색 */
+    color: #5d4037;
+    border-color: #fbc02d;
+    border-bottom-width: 2px; /* 눌렸을 때 높이 줄임 */
+    transform: translateY(2px); /* 눌리는 애니메이션 */
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* (2) 학생 카드 상태별 디자인 (확실한 구분) */
+body.kiosk-mode .student-card {
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    height: 320px; /* 카드 높이 조정 */
+}
+
+/* [상태 1: 미등원] - 깔끔한 흰색 */
+body.kiosk-mode .student-card.missing {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 8px 0 #cbd5e1; /* 회색 그림자 */
+    opacity: 1;
+}
+body.kiosk-mode .student-card.missing .profile-img {
+    filter: grayscale(0%); /* 사진 선명하게 */
+}
+
+/* [상태 2: 등원완료] - 눈에 띄는 초록색 테두리 & 입체감 */
+body.kiosk-mode .student-card.arrived {
+    background: linear-gradient(135deg, #ffffff 40%, #dcfce7 100%);
+    border: 3px solid #22c55e; /* 굵은 초록 테두리 */
+    box-shadow: 0 8px 0 #15803d; /* 진한 초록 그림자 */
+    transform: translateY(-2px);
+}
+body.kiosk-mode .student-card.arrived .kiosk-pill {
+    background: #22c55e; 
+    color: white;
+    border: none;
+    font-size: 16px;
+    box-shadow: 0 4px 10px rgba(34,197,94,0.4);
+}
+
+/* [상태 3: 하원완료] - 어둡고 흐릿하게 (확실히 꺼진 느낌) */
+body.kiosk-mode .student-card.left {
+    background: #f1f5f9;
+    border: 2px dashed #94a3b8;
+    box-shadow: none; /* 그림자 없음 (납작하게) */
+    opacity: 0.5; /* 반투명 */
+    transform: scale(0.95); /* 약간 축소 */
+    filter: grayscale(100%); /* 흑백 처리 */
+}
+
+/* 키오스크 모드에서 불필요한 요소 완벽 제거 */
+body.kiosk-mode .tabs,
+body.kiosk-mode header, 
+body.kiosk-mode .kiosk-btn-group,
+body.kiosk-mode .kiosk-exit-btn {
+    /* 저장/취소/메뉴 등 버튼 아예 안 보이게 처리 */
+    /* 단, 종료 버튼이 필요하면 kiosk-exit-btn은 제외하세요 */
+   display: none !important; 
+}
+
+/* 종료 버튼은 비상용으로 좌측 하단에 투명하게 숨김 (세 번 탭 기능 등 대체 가능하지만 일단 작게 표시) */
+body.kiosk-mode .kiosk-exit-btn {
+    display: flex !important;
+    top: auto; bottom: 20px; left: 20px; right: auto;
+    width: 40px; height: 40px;
+    opacity: 0.3;
+}
+/* (혹시 모를 키오스크 상단 분류 버튼도 같이 고정 해제) */
+.kiosk-header {
+    position: relative !important;
+    top: auto !important;
+}
+/* [수정] 일반 모드 원생 카드 사진 확대 */
+
+/* 1. 카드 전체 높이를 늘림 (사진이 커진 만큼 공간 확보) */
+.student-card {
+    height: 210px !important; /* 기존 170px -> 210px로 변경 */
+}
+
+/* 2. 사진 크기를 대폭 확대 */
+.profile-wrapper {
+    width: 100px !important;  /* 기존 64px -> 100px */
+    height: 100px !important; /* 정사각형 유지 */
+    margin-bottom: 12px !important; /* 사진과 이름 사이 간격 벌림 */
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08); /* 그림자도 살짝 진하게 */
+}
+
+/* 3. 사진 테두리 둥글기 조절 (선택사항) */
+.profile-img {
+    border-radius: 30px !important; /* 조금 더 둥글게 */
+}
+
+/* 4. 이름 글자 크기도 균형에 맞춰 약간 키움 */
+.info-area div:first-child {
+    font-size: 17px !important;
+    margin-bottom: 5px !important;
+}
+/* [수정] 브랜드 로고 및 타이틀 크기 확대 */
+.brand-mark {
+    width: 54px !important;       /* 로고 가로 크기 (기존 38px) */
+    height: 54px !important;      /* 로고 세로 크기 */
+    border-radius: 18px !important; /* 모서리 둥글기 */
+    box-shadow: 0 4px 12px rgba(59,130,246,0.25) !important; /* 그림자 강조 */
+}
+
+.brand-title strong {
+    font-size: 21px !important;   /* 제목 글자 크기 (기존 16px) */
+    letter-spacing: -0.5px !important; /* 자간 조절 */
+    margin-bottom: 3px !important;
+}
+
+.brand-title span {
+    font-size: 13px !important;   /* 아래 작은 설명글도 살짝 키움 */
+    color: #64748b !important;    /* 글자색을 조금 더 진하게 */
+}
+
+/* 로고와 글자 사이 간격도 조금 넓힘 */
+.brand {
+    gap: 14px !important;
+}
+/* [수정] 학습일정 체크박스 크기 조절 및 정렬 */
+#calendar .filter-group {
+    display: flex !important;       /* 가로로 나란히 배치 */
+    justify-content: center !important; /* 가운데 정렬 */
+    gap: 24px !important;           /* '학원일정'과 '생일' 사이 간격 */
+    margin-bottom: 18px !important;
+}
+
+#calendar .filter-group label {
+    display: inline-flex !important; /* 글자와 체크박스를 한 줄로 */
+    align-items: center !important;  /* 수직 중앙 정렬 */
+    gap: 8px !important;             /* 체크박스와 글자 사이 간격 */
+    font-size: 15px !important;      /* 글자 크기 적당하게 */
+    font-weight: 700 !important;     /* 글자 굵게 */
+    cursor: pointer;
+    width: auto !important;          /* 꽉 차는 문제 해결 */
+    margin: 0 !important;
+}
+
+#calendar .filter-group input[type="checkbox"] {
+    width: 22px !important;          /* 가로 크기 축소 */
+    height: 22px !important;         /* 세로 크기 축소 */
+    min-height: 0 !important;        /* 최소 높이 제한 해제 */
+    margin: 0 !important;            /* 불필요한 여백 제거 */
+    accent-color: #3B82F6;           /* 체크했을 때 브랜드 색상(파랑) */
+    cursor: pointer;
+    transform: translateY(-1px);     /* 글자와 높이 미세 조정 */
 }
 </style>
 </head>
@@ -1049,24 +1293,24 @@ body.show-admin .admin-only{
             
             <div class="brand-title">
                 <strong>미래엔수학 능동해냄</strong>
-                <span>출석 · 알림장 · 학습관리</span>
+                <span>학부모용 · 알림/출석/상담</span>
             </div>
         </div>
         
         <div style="display:flex; align-items:center; gap:8px;">
             <label class="admin-switch" style="margin:0; cursor:pointer;">
-                <input type="checkbox" id="adminToggle" onclick="toggleAdminMode()" style="width:16px; height:16px; margin-right:4px;"> 선생님
+                <input type="checkbox" id="adminToggle" onclick="toggleAdminMode()" style="width:auto; margin-right:6px;"> 선생님
             </label>
             <button class="admin-only" onclick="document.getElementById('settingsModal').style.display='flex'" 
-                style="border:1px solid var(--border); background:var(--surface2); width:36px; height:36px; border-radius:8px; color:var(--ink-sub); display:none; align-items:center; justify-content:center; cursor:pointer; min-height:auto;">
+                style="border:none; background:white; width:36px; height:36px; border-radius:50%; box-shadow:0 2px 5px rgba(0,0,0,0.1); color:#555;">
                 <i class="fas fa-cog"></i>
             </button>
         </div>
     </header>    
     <div class="tabs">
-        <button class="tab-btn active" onclick="showPage('register')"><i class="fas fa-user-plus"></i> <span>신규 등록</span></button>
-        <button class="tab-btn" onclick="showPage('list')"><i class="fas fa-users"></i> <span>원생 관리</span></button>
-        <button class="tab-btn" onclick="showPage('calendar')"><i class="fas fa-calendar-alt"></i> <span>학습 일정</span></button>
+        <button class="tab-btn active" onclick="showPage('register')"><i class="fas fa-user-plus"></i> 신규 등록</button>
+        <button class="tab-btn" onclick="showPage('list')"><i class="fas fa-users"></i> 원생 관리</button>
+        <button class="tab-btn" onclick="showPage('calendar')"><i class="fas fa-calendar-alt"></i> 학습 일정</button>
     </div>
 
     <div id="register" class="page active">
@@ -1107,7 +1351,7 @@ body.show-admin .admin-only{
             </div>
             <div class="full-width" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                 <div>
-                    <label style="color:var(--blue);">학부모 연락처 (알림용)</label>
+                    <label style="color:var(--primary);">학부모 연락처 (알림용)</label>
                     <input type="tel" id="regParentPhone" placeholder="01012345678">
                 </div>
                 <div>
@@ -1141,22 +1385,11 @@ body.show-admin .admin-only{
             </div>
             <div class="filter-row">
                 <span class="filter-label">검색</span>
-                <input type="text" id="searchKeyword" placeholder="이름 검색" onkeyup="filterList()" style="flex:1; min-height:38px;">
-                <select id="schoolFilter" onchange="filterList()" style="width:auto; flex:1; min-height:38px;">
+                <input type="text" id="searchKeyword" placeholder="이름 검색" onkeyup="filterList()" style="flex:1;">
+                <select id="schoolFilter" onchange="filterList()" style="width: auto; flex:1;">
                     <option value="all">전체 학교</option>
                 </select>
             </div>
-        </div>
-
-        <div class="admin-toolbar admin-only" style="display:none;">
-            <label style="display:flex; align-items:center; gap:6px; font-size:13px; font-weight:700; color:var(--ink-sub); cursor:pointer; margin:0;">
-                <input type="checkbox" id="selectAll" onclick="toggleSelectAll()" style="width:18px;height:18px;min-height:0;accent-color:var(--blue);">
-                전체선택
-            </label>
-            <span id="selectedCount" style="font-size:12px; font-weight:700; color:var(--blue-dark);">0명 선택됨</span>
-            <button id="bulkActionBtn" onclick="processBulkAttendance()" style="background:var(--blue); color:#fff; border:none; border-radius:8px; padding:8px 14px; font-weight:700; font-size:13px; cursor:pointer; min-height:auto; font-family:inherit;">
-                <i class="fas fa-check"></i> 일괄 등원처리
-            </button>
         </div>
         
         <div id="studentListArea">로딩중...</div>
@@ -1175,8 +1408,8 @@ body.show-admin .admin-only{
     </div>
 
     <div class="calendar-grid">
-        <div class="day-name" style="color:var(--red)">일</div><div class="day-name">월</div><div class="day-name">화</div>
-        <div class="day-name">수</div><div class="day-name">목</div><div class="day-name">금</div><div class="day-name" style="color:var(--blue)">토</div>
+        <div class="day-name" style="color:var(--danger)">일</div><div class="day-name">월</div><div class="day-name">화</div>
+        <div class="day-name">수</div><div class="day-name">목</div><div class="day-name">금</div><div class="day-name" style="color:var(--primary)">토</div>
     </div>
     <div class="calendar-grid" id="calGrid"></div>
     
@@ -1188,7 +1421,7 @@ body.show-admin .admin-only{
             <button class="view-mode-btn" onclick="changeListView('year', this)">연간</button>
         </div>
 
-        <h3 id="selectedDateText" style="font-size:15px; margin-bottom:10px; border-bottom:2px solid var(--blue); padding-bottom:5px; display:flex; justify-content:space-between; align-items:center;">
+        <h3 id="selectedDateText" style="font-size:15px; margin-bottom:10px; border-bottom:2px solid var(--primary); padding-bottom:5px; display:flex; justify-content:space-between; align-items:center;">
             <span>날짜를 선택하세요</span>
             <button class="action-btn admin-only" id="addSchedBtn" onclick="openScheduleModal()" style="width:auto; margin:0; padding:5px 10px; font-size:12px; display:none;">+ 일정 등록</button>
         </h3>
@@ -1199,15 +1432,15 @@ body.show-admin .admin-only{
 
 <div class="modal-overlay" id="scheduleModal">
     <div class="modal" style="max-width:340px;">
-        <h3 id="schedModalTitle" style="margin:0 0 14px; font-size:16px; font-weight:800;">📅 일정 관리</h3>
+        <h3 id="schedModalTitle" style="margin-top:0;">📅 일정 관리</h3>
         
-        <div style="margin-bottom:14px;">
+        <div style="margin-bottom:15px;">
             <label style="margin-bottom:5px;">등록된 일정</label>
-            <div id="popupSchedList" style="background:var(--surface2); padding:10px; border-radius:var(--r-sm); border:1px solid var(--border); min-height:46px; max-height:110px; overflow-y:auto; font-size:13px;">
-            </div>
+            <div id="popupSchedList" style="background:#f1f5f9; padding:10px; border-radius:8px; min-height:50px; max-height:120px; overflow-y:auto; font-size:13px;">
+                </div>
         </div>
 
-        <hr style="border:0; border-top:1px solid var(--border); margin:12px 0;">
+        <hr style="border:0; border-top:1px dashed #ddd; margin:15px 0;">
 
         <label>날짜 선택</label>
         <input type="date" id="schedDate" style="margin-bottom:10px;">
@@ -1217,7 +1450,7 @@ body.show-admin .admin-only{
         
         <div class="modal-btn-group" style="display:flex; gap:8px;">
             <button class="action-btn" onclick="saveSchedule()" style="margin:0; flex:2;">저장/추가</button>
-            <button class="action-btn" onclick="deleteSchedule()" id="btnDelSched" style="margin:0; flex:1; background:var(--red); display:none;">삭제</button>
+            <button class="action-btn" onclick="deleteSchedule()" id="btnDelSched" style="margin:0; flex:1; background:var(--danger); display:none;">삭제</button>
             <button class="action-btn" onclick="document.getElementById('scheduleModal').style.display='none'" style="margin:0; flex:1; background:#94a3b8;">닫기</button>
         </div>
     </div>
@@ -1229,11 +1462,11 @@ body.show-admin .admin-only{
         
         <div class="modal-header-profile">
             <div style="width:80px; height:80px; margin:0 auto; position:relative;" onclick="triggerPhotoEdit()">
-                <img id="modalImg" src="" style="width:100%; height:100%; border-radius:50%; object-fit:cover; border:3px solid var(--border-focus); box-shadow:0 4px 10px rgba(0,0,0,0.1);">
-                <div class="admin-only" style="position:absolute; bottom:0; right:0; background:var(--blue); color:white; padding:4px 7px; border-radius:50%; font-size:11px;"><i class="fas fa-camera"></i></div>
+                <img id="modalImg" src="" style="width:100%; height:100%; border-radius:50%; object-fit:cover; border:3px solid var(--secondary); box-shadow:0 4px 10px rgba(0,0,0,0.1);">
+                <div class="admin-only" style="position:absolute; bottom:0; right:0; background:var(--primary); color:white; padding:4px 7px; border-radius:50%; font-size:11px;"><i class="fas fa-camera"></i></div>
             </div>
             <h2 id="modalName" style="margin:8px 0 4px 0; font-size:20px;"></h2>
-            <div id="modalInfo" style="color:var(--ink-sub); font-size:13px; margin-bottom:10px;"></div>
+            <div id="modalInfo" style="color:var(--text-sub); font-size:13px; margin-bottom:10px;"></div>
             
             <div class="contact-row">
                 <div class="contact-group">
@@ -1260,58 +1493,60 @@ body.show-admin .admin-only{
         </div>
 
 <div id="tabDaily" class="modal-tab-pane active">
-    <div class="stat-box">
-        <div class="stat-item"><div class="stat-num" id="statMonth">0회</div><div style="font-size:12px; color:var(--ink-sub); margin-top:2px;">이번달 등원</div></div>
-        <div class="stat-item"><div class="stat-num" id="statTotal">0회</div><div style="font-size:12px; color:var(--ink-sub); margin-top:2px;">총 등원일</div></div>
+    <div class="stat-box" style="margin: 0 0 15px 0;">
+        <div class="stat-item"><div class="stat-num" id="statMonth">0%</div><div style="font-size:12px;">이번달 출석률</div></div>
+        <div class="stat-item"><div class="stat-num" id="statTotal">0회</div><div style="font-size:12px;">총 등원일</div></div>
     </div>
 
-    <div class="notice-panel">
-        <h4><i class="fas fa-bullhorn"></i> 오늘의 학습 알림장</h4>
+    <div style="background:#fffde7; border:1px solid #fff9c4; border-radius:10px; padding:15px;">
+        <h4 style="margin:0 0 10px 0; color:#fbc02d;"><i class="fas fa-bullhorn"></i> 오늘의 학습 안내</h4>
         <textarea id="dailyProgress" rows="3" placeholder="오늘 공부한 내용을 입력하세요" style="background:white; margin-bottom:8px;"></textarea>
-        <div id="noticePreview" style="background:white; padding:10px; border:1px dashed #E5E7EB; font-size:12px; white-space:pre-wrap; color:#555; margin-bottom:8px; min-height:36px; border-radius:8px;">(내용 미리보기)</div>
-        <div class="notice-btn-row">
-            <button class="action-btn" onclick="generateNotice()" style="background:#D97706; margin-top:0;">📝 양식</button>
-            <button class="action-btn" onclick="copyNotice()" style="background:#92400E; margin-top:0;">📋 복사</button>
-            <button class="action-btn" onclick="sendNoticeSms()" style="background:#16A34A; margin-top:0;">📩 문자</button>
-            <button class="action-btn" onclick="sendNoticeKakao()" style="background:#CA8A04; margin-top:0;">💬 카톡</button>
+        
+        <div id="noticePreview" style="background:white; padding:10px; border:1px dashed #ddd; font-size:12px; white-space:pre-wrap; color:#555; margin-bottom:8px; min-height:40px;">(내용 미리보기)</div>
+
+        <div class="modal-action-row" style="display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap:5px;">
+            <button class="action-btn" onclick="generateNotice()" style="background:#fbc02d; margin:0; font-size:13px; padding:10px 0;">📝 양식</button>
+            <button class="action-btn" onclick="copyNotice()" style="background:#ffa000; margin:0; font-size:13px; padding:10px 0;">📋 복사</button>
+            <button class="action-btn" onclick="sendNoticeSms()" style="background:#4caf50; margin:0; font-size:13px; padding:10px 0;">📩 문자</button>
+            <button class="action-btn" onclick="sendNoticeKakao()" style="background:#fee500; color:#3c1e1e; margin:0; font-size:13px; padding:10px 0;">🟡 카톡</button>
         </div>
     </div>
 </div>
         <div id="tabScore" class="modal-tab-pane">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <h4 style="margin:0; font-size:14px; font-weight:800; color:var(--ink);">💬 상담 및 학습 로그</h4>
-                <span style="font-size:11px; color:var(--ink-muted);">최근 순으로 표시됩니다</span>
+                <h4 style="margin:0; color:var(--text-main);">💬 상담 및 학습 로그</h4>
+                <span style="font-size:12px; color:#999;">최근 순으로 표시됩니다</span>
             </div>
 
-            <div id="modalCounselLog" style="background:var(--surface2); border-radius:var(--r-sm); padding:12px; height:220px; overflow-y:auto; margin-bottom:12px; border:1px solid var(--border);"></div>
+            <div id="modalCounselLog" style="background:#f5f7f9; border-radius:8px; padding:15px; height:250px; overflow-y:auto; margin-bottom:15px; border:1px solid #eee;"></div>
             
-            <div class="admin-only" style="display:flex; gap:6px; margin-bottom:16px;">
-                <input type="text" id="newCounsel" placeholder="상담 내용 기록" style="flex:1; min-height:40px;">
-                <button onclick="addCounselLog()" style="background:var(--blue); color:white; border:none; padding:0 16px; border-radius:var(--r-sm); font-weight:700; cursor:pointer; min-height:40px; font-family:inherit;">등록</button>
+            <div class="admin-only" style="display:flex; gap:5px; margin-bottom:20px;">
+                <input type="text" id="newCounsel" placeholder="상담 내용 기록" style="flex:1;">
+                <button onclick="addCounselLog()" style="background:var(--primary); color:white; border:none; padding:0 20px; border-radius:8px; font-weight:bold;">등록</button>
             </div>
 
-            <details style="background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:10px;">
-                <summary style="font-weight:700; color:#7C3AED; cursor:pointer; padding:4px; list-style:none; display:flex; align-items:center; justify-content:space-between; font-size:13px;">
+            <details style="background:white; border:1px solid #e0e0e0; border-radius:10px; padding:10px;">
+                <summary style="font-weight:bold; color:#7b1fa2; cursor:pointer; padding:5px; list-style:none; display:flex; align-items:center; justify-content:space-between;">
                     <span>📈 성적 그래프 및 기록 관리</span>
-                    <i class="fas fa-chevron-down" style="font-size:11px; color:var(--ink-muted);"></i>
+                    <i class="fas fa-chevron-down" style="font-size:12px; color:#aaa;"></i>
                 </summary>
                 
-                <div style="margin-top:12px; padding-top:12px; border-top:1px dashed var(--border);">
-                    <div style="margin-bottom:12px;">
-                        <canvas id="scoreChart" height="160"></canvas>
+                <div style="margin-top:15px; padding-top:15px; border-top:1px dashed #eee;">
+                    <div class="chart-container" style="padding:0; margin-bottom:15px; border:none;">
+                        <canvas id="scoreChart" height="180"></canvas>
                     </div>
 
-                    <div class="admin-only" style="background:#F5F3FF; padding:10px; border-radius:8px; margin-bottom:12px;">
-                        <div style="font-size:11px; font-weight:700; color:#7C3AED; margin-bottom:6px;">새 성적 등록</div>
+                    <div class="admin-only" style="background:#f3e5f5; padding:12px; border-radius:8px; margin-bottom:15px;">
+                        <div style="font-size:12px; font-weight:bold; color:#7b1fa2; margin-bottom:5px;">새 성적 등록</div>
                         <div class="score-input-group">
-                            <input type="text" id="scoreTitle" placeholder="시험명" style="flex:1.5; min-height:38px;">
-                            <input type="number" id="scoreValue" placeholder="점수" style="flex:1; min-height:38px;">
-                            <button onclick="addScore()" style="background:#7C3AED; color:white; border:none; padding:0 12px; border-radius:6px; font-weight:700; cursor:pointer; min-height:38px; font-family:inherit;">추가</button>
+                            <input type="text" id="scoreTitle" placeholder="시험명" style="flex:1.5;">
+                            <input type="number" id="scoreValue" placeholder="점수" style="flex:1;">
+                            <button onclick="addScore()" style="background:#7b1fa2; color:white; border:none; padding:0 15px; border-radius:6px;">추가</button>
                         </div>
                     </div>
 
-                    <h5 style="margin:0 0 8px; font-size:12px; color:var(--ink-sub);">📝 성적 기록 상세</h5>
-                    <div id="scoreList" style="font-size:12px; max-height:140px; overflow-y:auto; color:var(--ink-sub);"></div>
+                    <h5 style="margin:0 0 8px 0; color:#555;">📝 성적 기록 상세</h5>
+                    <div id="scoreList" style="font-size:13px; max-height:150px; overflow-y:auto; color:#666;"></div>
                 </div>
             </details>
         </div>
@@ -1319,19 +1554,19 @@ body.show-admin .admin-only{
         <div id="tabInfo" class="modal-tab-pane">
             <div class="settlement-box" style="margin-top:0;">
                 <h4 class="settlement-title" style="margin-top:0;"><i class="fas fa-file-invoice-dollar"></i> 교육비 정산 안내</h4>
-                <div id="settlementPreview" style="background:var(--surface); padding:10px; border:1px solid var(--border-focus); font-size:12px; white-space:pre-wrap; margin-bottom:8px; color:var(--ink); border-radius:8px; line-height:1.6;"></div>
+                <div id="settlementPreview" style="background:white; padding:10px; border:1px solid #bbdefb; font-size:12px; white-space:pre-wrap; margin-bottom:8px; color:#333;"></div>
                 <div class="modal-action-row">
-                    <button onclick="generateSettlement()" class="action-btn" style="background:var(--blue); margin-top:0;">문구 생성</button>
-                    <button onclick="copyText('settlementPreview')" class="action-btn" style="background:var(--blue-dark); margin-top:0;">복사</button>
+                    <button onclick="generateSettlement()" class="action-btn" style="background:#1976d2; margin-top:0;">문구 생성</button>
+                    <button onclick="copyText('settlementPreview')" class="action-btn" style="background:#1565c0; margin-top:0;">복사</button>
                 </div>
             </div>
 
             <div class="admin-only">
-                <h4 style="margin:16px 0 10px; border-top:1px solid var(--border); padding-top:14px; font-size:14px; font-weight:800;">학생 정보 수정</h4>
+                <h4 style="margin:20px 0 10px 0; border-top:1px solid #eee; padding-top:15px;">학생 정보 수정</h4>
                 <div id="modalEditForm" class="form-grid" style="grid-template-columns: 1fr;">
                     <input type="hidden" id="editId">
                     <div><label>이름</label><input type="text" id="editName"></div>
-                    <div style="display:flex; gap:8px;">
+                    <div style="display:flex; gap:10px;">
                         <div style="flex:1;"><label>생년월일</label><input type="date" id="editBirth"></div>
                         <div style="flex:1;"><label>성별</label><select id="editGender"><option value="남">남</option><option value="여">여</option></select></div>
                     </div>
@@ -1348,14 +1583,14 @@ body.show-admin .admin-only{
                     <div><label>주소</label><input type="text" id="editAddress"></div>
                     <div><label>특이사항</label><textarea id="editNotes" rows="2"></textarea></div>
                 </div>
-                <div class="modal-action-row" style="margin-top:12px;">
-                    <button class="action-btn" onclick="saveEdit()" style="background:var(--blue); margin-top:0;">저장</button>
-                    <button class="action-btn" onclick="deleteStudent()" style="background:var(--red); margin-top:0;">삭제</button>
+                <div class="modal-action-row" style="margin-top:15px;">
+                    <button class="action-btn" onclick="saveEdit()" style="background:var(--primary); margin-top:0;">저장</button>
+                    <button class="action-btn" onclick="deleteStudent()" style="background:var(--danger); margin-top:0;">삭제</button>
                 </div>
             </div>
             
-            <p style="text-align:center; color:var(--ink-muted); font-size:12px; margin-top:16px;">
-                * 정보 수정 및 정산 기능은 선생님 모드에서만 가능합니다.
+            <p style="text-align:center; color:#999; font-size:12px; margin-top:20px;">
+                * 정보 수정 및 정산 기능은<br>선생님 모드에서만 가능합니다.
             </p>
         </div>
     </div>
@@ -1641,23 +1876,18 @@ const SMS_API_URL = "/api/send-sms";
                 div.className = `student-card ${stateClass}`;
                 
                 div.innerHTML = `
-                    <div class="chk-wrapper">
-                        <input type="checkbox" class="list-chk" value="${s.id}" onclick="toggleSelection('${s.id}', event)">
+                    <div class="profile-wrapper" style="width:55px; height:55px; margin:0;">
+                        <img src="${imgSrc}" class="profile-img" style="border-radius:18px;">
                     </div>
-                    <div class="profile-wrapper" style="width:52px; height:52px; margin:0; flex-shrink:0;">
-                        <img src="${imgSrc}" class="profile-img">
-                    </div>
-                    <div class="info-area" style="text-align:left; padding-left:12px;">
-                        <div style="display:flex; align-items:center; gap:4px; flex-wrap:wrap;">
-                            <strong style="font-size:15px; font-weight:800;">${s.name}</strong>
+                    <div class="info-area" style="text-align:left; padding-left:15px;">
+                        <div>
+                            <strong style="color:#333; font-size:16px;">${s.name}</strong> 
                             <span class="dept-badge">${s.belt || ''}</span>
                         </div>
-                        <div style="font-size:12px; color:#6B7280; margin-top:3px;">${s.school || ''}</div>
-                        ${hasArrived ? `<div style="font-size:11px; color:#16A34A; font-weight:700; margin-top:2px;">✓ 등원완료</div>` : ''}
-                        ${hasLeft ? `<div style="font-size:11px; color:#9CA3AF; font-weight:700; margin-top:2px;">↩ 하원완료</div>` : ''}
+                        <div style="font-size:13px; color:#777; margin-top:4px;">${s.school || ''}</div>
                     </div>
                 `;
-                div.onclick = (e) => { if(e.target.type !== 'checkbox') window.openDetail(s); };
+                div.onclick = () => window.openDetail(s);
             }
             listArea.appendChild(div);
         });
@@ -1919,7 +2149,7 @@ const SMS_API_URL = "/api/send-sms";
             const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
             const dayEvents = events.filter(e => e.date === dateStr);
             const isToday = dateStr === new Date().toISOString().slice(0,10) ? 'today' : '';
-            const isSelected = dateStr === selectedDateStr ? 'border: 2px solid var(--blue);' : '';
+            const isSelected = dateStr === selectedDateStr ? 'border: 2px solid var(--primary);' : '';
             
             let dots = "";
             dayEvents.forEach(e => { dots += `<span class="event-dot dot-${e.type}"></span>`; });
@@ -2077,11 +2307,6 @@ const SMS_API_URL = "/api/send-sms";
             const chk = document.getElementById('adminToggle');
             if(chk) chk.checked = false;
             document.body.classList.remove('show-admin');
-            // list 페이지 활성화
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            const listPage = document.getElementById('list');
-            if(listPage) listPage.classList.add('active');
-            document.getElementById('settingsModal').style.display = 'none';
             filterList();
         }
     };
@@ -2090,8 +2315,6 @@ const SMS_API_URL = "/api/send-sms";
         if (prompt("비밀번호:") === "1234") { 
             document.body.classList.remove('kiosk-mode');
             alert("선생님 모드로 돌아왔습니다.");
-            // list 페이지 활성화 후 탭도 맞춤
-            window.showPage('list');
             filterList();
         } else {
             alert("비밀번호 불일치");
@@ -2206,25 +2429,16 @@ const SMS_API_URL = "/api/send-sms";
 
             // 3. 입력한 값과 서버 값을 비교
             if(pw === dbPw) { 
-                document.body.classList.remove('kiosk-mode');
                 document.body.classList.add('show-admin');
                 if(btnKiosk) btnKiosk.style.display = 'inline-block';
-                // 선생님 모드: 리스트 페이지로 전환
-                window.showPage('list');
-                filterList();
             } else {
                 alert("비밀번호가 틀렸습니다.");
                 chk.checked = false;
             }
         } else {
-            // 체크 해제 시 → 다시 키오스크 모드로
+            // 체크 해제 시
             document.body.classList.remove('show-admin');
-            document.body.classList.add('kiosk-mode');
             if(btnKiosk) btnKiosk.style.display = 'none';
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            const listPage = document.getElementById('list');
-            if(listPage) listPage.classList.add('active');
-            filterList();
         }
     };
 
@@ -2714,11 +2928,6 @@ window.buildNoticeUrl = async function(studentId, target){
             const chk = document.getElementById('adminToggle');
             if(chk) chk.checked = false;
 
-            // ★ list 페이지 active 설정 (이게 없으면 카드가 안 보임)
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            const listPage = document.getElementById('list');
-            if(listPage) listPage.classList.add('active');
-
             // 리스트 갱신
             if(window.filterList) window.filterList();
             
@@ -2751,7 +2960,7 @@ window.buildNoticeUrl = async function(studentId, target){
             
             const s = sSnap.data();
             
-            // 전역변수에 저장
+            // 전역변수에 저장 (답장 보낼 때 사용)
             window.currentNoticeStudentId = studentId;
             window.currentToken = token;
 
@@ -2774,15 +2983,15 @@ window.buildNoticeUrl = async function(studentId, target){
                 cList.innerHTML = "";
                 const cLogs = s.counselLog || [];
                 if(cLogs.length > 0) {
-                    cLogs.slice().reverse().forEach(log => {
+                    cLogs.reverse().forEach(log => {
                         cList.innerHTML += `
-                            <div style="border-bottom:1px solid #E5E7EB; padding:8px 0; font-size:13px;">
-                                <span style="color:#2563EB; font-weight:700;">[${log.date}]</span> 
+                            <div style="border-bottom:1px dashed #ddd; padding:8px 0;">
+                                <span style="color:#0369a1; font-weight:bold;">[${log.date}]</span> 
                                 ${log.text}
                             </div>`;
                     });
                 } else {
-                    cList.innerHTML = "<div style='text-align:center; padding:10px; color:#9CA3AF;'>기록된 내역이 없습니다.</div>";
+                    cList.innerHTML = "<div style='text-align:center; padding:10px; color:#999;'>기록된 내역이 없습니다.</div>";
                 }
             }
 
@@ -2792,8 +3001,30 @@ window.buildNoticeUrl = async function(studentId, target){
         }
     }
 
-    // [학부모 답장 기능 제거 - 단방향 알림장으로 운영]
-    window.sendParentReply = () => {};
+    // [추가] 학부모 답장 보내기
+    window.sendParentReply = async () => {
+        const msgEl = document.getElementById('n_replyMsg');
+        if(!msgEl) return;
+        const msg = msgEl.value.trim();
+        
+        if(!msg) return alert("내용을 입력해주세요.");
+        
+        if(confirm("선생님께 메시지를 보내시겠습니까?")) {
+            try {
+                await addDoc(collection(db, "parentMessages"), {
+                    token: window.currentToken,
+                    studentId: window.currentNoticeStudentId,
+                    message: msg,
+                    createdAt: serverTimestamp(),
+                    read: false
+                });
+                alert("전송되었습니다! ✅");
+                msgEl.value = "";
+            } catch(e) {
+                alert("전송 실패: " + e.message);
+            }
+        }
+    };
 // =========================================================
     // [추가] 모바일 좌우 슬라이드(스와이프) 기능
     // =========================================================
@@ -2861,56 +3092,66 @@ window.buildNoticeUrl = async function(studentId, target){
 </div>
 
 <div class="modal-overlay" id="settingsModal">
-    <div class="modal" style="max-width:320px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; border-bottom:1px solid var(--border); padding-bottom:12px;">
-            <h3 style="margin:0; font-size:16px; font-weight:800;">⚙️ 관리자 설정</h3>
-            <button onclick="document.getElementById('settingsModal').style.display='none'" style="border:none; background:none; font-size:22px; color:var(--ink-sub); cursor:pointer; min-height:auto; line-height:1;">&times;</button>
+    <div class="modal" style="max-width:340px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">
+            <h3 style="margin:0;">⚙️ 관리자 설정</h3>
+            <button onclick="document.getElementById('settingsModal').style.display='none'" style="border:none; background:none; font-size:20px;">&times;</button>
         </div>
         
-        <div style="display:grid; gap:8px;">
-            <button class="action-btn" onclick="startKioskMode()" style="background:var(--yellow-light); color:var(--orange); border:1px solid #FCD34D; box-shadow:none; text-align:left; display:flex; align-items:center; gap:8px;">
+        <div style="display:grid; gap:10px;">
+            <button class="action-btn" onclick="startKioskMode()" style="background:#fffbeb; color:#b45309; border:1px solid #fcd34d; box-shadow:none;">
                 <i class="fas fa-tablet-alt"></i> 출석부 모드 시작
             </button>
-            <button class="action-btn" onclick="downloadExcel()" style="background:var(--green-bg); color:var(--green); border:1px solid #86EFAC; box-shadow:none; text-align:left; display:flex; align-items:center; gap:8px;">
+            <button class="action-btn" onclick="downloadExcel()" style="background:#f0fdf4; color:#15803d; border:1px solid #86efac; box-shadow:none;">
                 <i class="fas fa-file-excel"></i> 엑셀 명단 저장
             </button>
-            <button class="action-btn" onclick="downloadBackup()" style="background:var(--blue-light); color:var(--blue-dark); border:1px solid var(--border-focus); box-shadow:none; text-align:left; display:flex; align-items:center; gap:8px;">
+            <button class="action-btn" onclick="downloadBackup()" style="background:#eff6ff; color:#1d4ed8; border:1px solid #93c5fd; box-shadow:none;">
                 <i class="fas fa-download"></i> 데이터 백업 (JSON)
             </button>
-            <button class="action-btn" onclick="document.getElementById('restoreInput').click()" style="background:#FAF5FF; color:#7E22CE; border:1px solid #D8B4FE; box-shadow:none; text-align:left; display:flex; align-items:center; gap:8px;">
+            <button class="action-btn" onclick="document.getElementById('restoreInput').click()" style="background:#faf5ff; color:#7e22ce; border:1px solid #d8b4fe; box-shadow:none;">
                 <i class="fas fa-upload"></i> 데이터 복구
             </button>
-            <button class="action-btn" onclick="changeAdminPassword()" style="background:var(--red-bg); color:var(--red); border:1px solid #FCA5A5; box-shadow:none; text-align:left; display:flex; align-items:center; gap:8px;">
+            <button class="action-btn" onclick="changeAdminPassword()" style="background:#fff1f2; color:#be123c; border:1px solid #fda4af; box-shadow:none;">
                 <i class="fas fa-key"></i> 관리자 비번 변경
             </button>
         </div>
         <input type="file" id="restoreInput" accept=".json" style="display:none" onchange="restoreData(event)">
     </div>
 </div>
-<div id="noticeModeSection" style="display:none;">
+<div id="noticeModeSection" style="display:none; max-width:600px; margin:0 auto; padding:20px; font-family:'Pretendard', sans-serif;">
     
-    <div class="notice-card" style="text-align:center;">
-        <img src="nam-192.png" style="width:64px; height:64px; border-radius:14px; border:1px solid var(--border); margin-bottom:10px;" onerror="this.style.display='none'">
-        <h2 id="n_name" style="font-size:20px; font-weight:900; color:var(--ink); margin:0;">-</h2>
-        <p id="n_info" style="color:var(--ink-sub); font-size:13px; margin:4px 0 0;">-</p>
-        <div style="margin-top:12px; padding:10px 14px; background:var(--blue-light); border-radius:10px; color:var(--blue-dark); font-weight:800; font-size:14px; display:inline-block;">
+    <div style="background:#fff; border-radius:20px; padding:25px; margin-bottom:15px; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.08);">
+        <img src="nam-192.png" style="width:70px; height:70px; border-radius:20px; box-shadow:0 4px 10px rgba(0,0,0,0.1); margin-bottom:10px;">
+        <h2 id="n_name" style="margin:0; font-size:22px; color:#333;">-</h2>
+        <p id="n_info" style="color:#666; font-size:14px; margin:5px 0 0;">-</p>
+        <div style="margin-top:15px; padding:10px; background:#f0f9ff; border-radius:12px; color:#0369a1; font-weight:bold;">
             이번 달 등원: <span id="n_attCount">0</span>회
         </div>
     </div>
 
-    <div class="notice-card">
-        <h3>📢 선생님 알림</h3>
-        <div id="n_notice" style="background:var(--yellow-light); padding:14px; border-radius:10px; border:1px solid #FCD34D; line-height:1.7; white-space:pre-wrap; font-size:14px;">(등록된 내용이 없습니다)</div>
+    <div style="background:#fff; border-radius:20px; padding:20px; margin-bottom:15px; border:1px solid #e2e8f0;">
+        <h3 style="margin:0 0 10px; font-size:17px; display:flex; align-items:center; gap:8px;">
+            📢 선생님 알림
+        </h3>
+        <div id="n_notice" style="background:#fffbeb; padding:15px; border-radius:12px; border:1px solid #fcd34d; line-height:1.6; white-space:pre-wrap;">(등록된 내용이 없습니다)</div>
     </div>
 
-    <div class="notice-card">
-        <h3>💬 상담 및 지도 내역</h3>
-        <div id="n_counselList" style="max-height:200px; overflow-y:auto; background:var(--surface2); padding:10px; border-radius:10px; border:1px solid var(--border); font-size:13px; color:var(--ink-sub);">
-            <div style="text-align:center; color:var(--ink-muted);">기록된 상담 내역이 없습니다.</div>
+    <div style="background:#fff; border-radius:20px; padding:20px; margin-bottom:15px; border:1px solid #e2e8f0;">
+        <h3 style="margin:0 0 10px; font-size:17px;">💬 상담 및 지도 내역</h3>
+        <div id="n_counselList" style="max-height:200px; overflow-y:auto; background:#f8fafc; padding:10px; border-radius:12px; font-size:13px; color:#555;">
+            <div style="text-align:center; color:#999;">기록된 상담 내역이 없습니다.</div>
         </div>
     </div>
 
-    <div style="text-align:center; margin-top:20px; color:var(--ink-muted); font-size:12px;">
+    <div style="background:#fff; border-radius:20px; padding:20px; border:1px solid #e2e8f0;">
+        <h3 style="margin:0 0 10px; font-size:17px;">✏️ 선생님께 답장하기</h3>
+        <textarea id="n_replyMsg" style="width:100%; height:80px; padding:10px; border:1px solid #cbd5e1; border-radius:10px; resize:none;" placeholder="선생님께 드릴 말씀이나 궁금한 점을 남겨주세요."></textarea>
+        <button onclick="sendParentReply()" style="width:100%; margin-top:10px; background:#3b82f6; color:white; border:none; padding:12px; border-radius:12px; font-weight:bold; font-size:15px; cursor:pointer;">
+            메시지 보내기
+        </button>
+    </div>
+
+    <div style="text-align:center; margin-top:30px; color:#94a3b8; font-size:12px;">
         미래엔수학 능동해냄 교실
     </div>
 </div>
